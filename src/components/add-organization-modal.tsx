@@ -33,12 +33,12 @@ const initialFormData: OrganizationFormData = {
     phoneNumber: "",
 }
 
-export function AddOrganizationModal({ isOpen, onClose, onSubmit }: AddOrganizationModalProps) {
+export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalProps) {
     const [formData, setFormData] = useState<OrganizationFormData>(initialFormData)
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onSubmit(formData)
+        // onSubmit(formData)
         setFormData(initialFormData)
         onClose()
     }

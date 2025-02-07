@@ -19,7 +19,8 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { RiFileUploadLine } from "react-icons/ri"
-import { AddOrganizationModal } from "./add-organization-modal"
+import { AddOrganizationModal } from "@/components/add-organization-modal"
+
 
 interface Organization {
     id: string
@@ -58,7 +59,7 @@ const initialData: Organization[] = [
     },
 ]
 
-export default function SuperAdminDashboard() {
+const Accounts = () => {
     const [searchQuery, setSearchQuery] = useState("")
     const [entriesPerPage, setEntriesPerPage] = useState("10")
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -88,7 +89,6 @@ export default function SuperAdminDashboard() {
                             // Handle the new organization data here
                             console.log("New organization:", data)
                         }}
-                    // onSubmit={handleAddOrganization}
                     />
                 </div>
             </div>
@@ -188,3 +188,4 @@ export default function SuperAdminDashboard() {
     )
 }
 
+export default Accounts
