@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchRole = async () => {
             // const userRole = await getUserRole(); // Fetch user role from session, API, or cookies
-            const userRole = "user"
+            const userRole = JSON.parse(localStorage.getItem('authDetails') as string).data.user_type
             // const userRole = "super_admin"
             if (!userRole) {
                 router.push('/dashboard'); // Redirect if not authenticated
@@ -33,7 +33,7 @@ const Dashboard = () => {
         <>
 
             <div>
-                {role === "super_admin" ? <SuperAdmindashboard /> : <ChatComponent />}
+                {role === "superuser" ? <SuperAdmindashboard /> : <ChatComponent />}
             </div>
         </>
     );

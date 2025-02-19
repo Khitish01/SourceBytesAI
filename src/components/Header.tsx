@@ -5,7 +5,7 @@ import { TbUserSquare } from "react-icons/tb";
 
 export const Header = () => {
     return (
-        <header className="p-4 flex items-center justify-between border-b border-zinc-200">
+        <header className="p-4 pl-0 flex items-center justify-between border-b border-zinc-200">
             <h1 className="text-xl font-semibold text-zinc-900">Powering Enterprise Innovation with Gen-AI</h1>
             <div className="flex items-center gap-4">
                 <button className="p-2 border-[1.5px] hover:bg-zinc-100 transition-colors">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createOrganisation } from "./apicalls/organisation"
 
 interface AddOrganizationModalProps {
     isOpen: boolean
@@ -15,31 +16,37 @@ interface AddOrganizationModalProps {
 
 interface OrganizationFormData {
     name: string
-    email: string
-    accountManagerName: string
-    accountManagerEmail: string
-    subscriptionType: string
+    contact_email: string
+    account_manager_name: string
+    account_manager_email: string
+    subscription_type: string
     address: string
-    phoneNumber: string
+    phone_number: string
 }
 
 const initialFormData: OrganizationFormData = {
     name: "",
-    email: "",
-    accountManagerName: "",
-    accountManagerEmail: "",
-    subscriptionType: "",
+    contact_email: "",
+    account_manager_name: "",
+    account_manager_email: "",
+    subscription_type: "",
     address: "",
-    phoneNumber: "",
+    phone_number: "",
 }
 
 export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalProps) {
     const [formData, setFormData] = useState<OrganizationFormData>(initialFormData)
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         // onSubmit(formData)
-        setFormData(initialFormData)
+        // setFormData(formData)
+        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+        const token = authDetails?.data?.token;
+        const response = await createOrganisation(token, formData);
+        console.log(formData);
+        console.log(response);
+
         onClose()
     }
 
@@ -61,26 +68,26 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                             <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email*</Label>
-                            <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                            <Label htmlFor="contact_email">Email*</Label>
+                            <Input id="contact_email" name="contact_email" type="email" value={formData.contact_email} onChange={handleChange} required />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="accountManagerName">Account Manager Name*</Label>
+                            <Label htmlFor="account_manager_name">Account Manager Name*</Label>
                             <Input
-                                id="accountManagerName"
-                                name="accountManagerName"
-                                value={formData.accountManagerName}
+                                id="account_manager_name"
+                                name="account_manager_name"
+                                value={formData.account_manager_name}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="accountManagerEmail">Account Manager Email*</Label>
+                            <Label htmlFor="account_manager_email">Account Manager Email*</Label>
                             <Input
-                                id="accountManagerEmail"
-                                name="accountManagerEmail"
+                                id="account_manager_email"
+                                name="account_manager_email"
                                 type="email"
-                                value={formData.accountManagerEmail}
+                                value={formData.account_manager_email}
                                 onChange={handleChange}
                                 required
                             />
@@ -88,16 +95,16 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                         <div className="grid gap-2">
                             <Label htmlFor="subscriptionType">Subscription Type</Label>
                             <Select
-                                value={formData.subscriptionType}
-                                onValueChange={(value) => setFormData((prev) => ({ ...prev, subscriptionType: value }))}
+                                value={formData.subscription_type}
+                                onValueChange={(value) => setFormData((prev) => ({ ...prev, subscription_type: value }))}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select subscription type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="free">Free Trial</SelectItem>
-                                    <SelectItem value="professional">Professional</SelectItem>
-                                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                                    <SelectItem value="Free Trial">Free Trial</SelectItem>
+                                    <SelectItem value="Professional">Professional</SelectItem>
+                                    {/* <SelectItem value="enterprise">Enterprise</SelectItem> */}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -106,12 +113,12 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                             <Input id="address" name="address" value={formData.address} onChange={handleChange} />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="phoneNumber">Phone Number</Label>
+                            <Label htmlFor="phone_number">Phone Number</Label>
                             <Input
-                                id="phoneNumber"
-                                name="phoneNumber"
+                                id="phone_number"
+                                name="phone_number"
                                 type="tel"
-                                value={formData.phoneNumber}
+                                value={formData.phone_number}
                                 onChange={handleChange}
                             />
                         </div>

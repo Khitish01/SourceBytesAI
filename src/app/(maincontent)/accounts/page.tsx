@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/pagination"
 import { RiFileUploadLine } from "react-icons/ri"
 import { AddOrganizationModal } from "@/components/add-organization-modal"
+import { useRouter } from "next/navigation"
+import { getAdminList } from "@/components/apicalls/admin-acount"
+import { AddAdminModal } from "./add-admin-modal"
 
 
 interface Organization {
@@ -63,31 +66,54 @@ const Accounts = () => {
     const [searchQuery, setSearchQuery] = useState("")
     const [entriesPerPage, setEntriesPerPage] = useState("10")
     const [isModalOpen, setIsModalOpen] = useState(false)
-
-    const filteredData = initialData.filter((org) => org.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    const [listings, setListings] = useState<any[]>([]);
 
     // const handleAddOrganization = (data: any): void => {
     //     // Handle the new organization data here
     //     console.log("New organization:", data)
     // }
 
+    const loadListings = async () => {
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getAdminList(token);
+            setListings(fetchedListings.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+        }
+    };
+
+
+    useEffect(() => {
+        loadListings();
+    }, []); // Empty dependency array ensures it runs only once when the component mounts.
+
+
+
     return (
         <div className="container mx-auto py-6 space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-semibold">All Organizations</h1>
+                    <h1 className="text-2xl font-semibold">All Admins</h1>
                 </div>
                 <div>
                     <Button className="bg-orange-500 hover:bg-orange-600 flex items-center" onClick={() => setIsModalOpen(true)}>
                         <RiFileUploadLine className="h-4 w-4" />
-                        Add Organization
+                        Add Admin
                     </Button>
-                    <AddOrganizationModal
+                    <AddAdminModal
                         isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onSubmit={(data) => {
-                            // Handle the new organization data here
-                            console.log("New organization:", data)
+                        onClose={() => {
+                            loadListings()
+                            setIsModalOpen(false)
                         }}
                     />
                 </div>
@@ -117,33 +143,20 @@ const Accounts = () => {
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Organization Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Subscription Type</TableHead>
-                                <TableHead>Account Manager</TableHead>
-                                <TableHead>Status</TableHead>
+                            <TableRow className="bg-gray-200">
+                                <TableHead>Admin Name</TableHead>
+                                <TableHead>Admin Email</TableHead>
+                                <TableHead>Organization</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredData.map((org) => (
-                                <TableRow key={org.id} className="cursor-pointer hover:bg-muted/50">
+                            {listings && listings.map((org: any) => (
+                                <TableRow key={org.admin_email} className="cursor-pointer hover:bg-gray-200/50">
                                     <TableCell className="font-medium">
-                                        <Link href={`/edit-organisation`}>{org.name}</Link>
+                                        {org.admin_name}
                                     </TableCell>
-                                    <TableCell>{org.email}</TableCell>
-                                    <TableCell>{org.subscriptionType}</TableCell>
-                                    <TableCell>{org.accountManager}</TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant="outline"
-                                            className={
-                                                org.status === "Active" ? "border-green-500 text-green-500" : "border-gray-500 text-gray-500"
-                                            }
-                                        >
-                                            {org.status}
-                                        </Badge>
-                                    </TableCell>
+                                    <TableCell>{org.admin_email}</TableCell>
+                                    <TableCell>{org.organization}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

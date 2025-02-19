@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/pagination"
 import { RiFileUploadLine } from "react-icons/ri"
 import { AddOrganizationModal } from "./add-organization-modal"
+import { getOrganisationList } from "./apicalls/organisation"
+import { useRouter } from "next/navigation"
 
 interface Organization {
     id: string
@@ -31,44 +33,44 @@ interface Organization {
     address?: string
 }
 
-const initialData: Organization[] = [
-    {
-        id: "1",
-        name: "World Health Organization",
-        email: "gate@gmail.com",
-        subscriptionType: "Professional",
-        accountManager: "Tanmay Rath",
-        status: "Active",
-    },
-    {
-        id: "2",
-        name: "World Trade Organization",
-        email: "gate@gmail.com",
-        subscriptionType: "Free Trial",
-        accountManager: "Tanmay Rath",
-        status: "Active",
-    },
-    {
-        id: "3",
-        name: "Bill Gates",
-        email: "gate@gmail.com",
-        subscriptionType: "-",
-        accountManager: "Tanmay Rath",
-        status: "Inactive",
-    },
-]
 
 export default function SuperAdminDashboard() {
     const [searchQuery, setSearchQuery] = useState("")
     const [entriesPerPage, setEntriesPerPage] = useState("10")
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const [listings, setListings] = useState<any[]>([]);
+    const router = useRouter();
 
-    const filteredData = initialData.filter((org) => org.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    const loadListings = async () => {
+        setLoading(true);
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
 
-    // const handleAddOrganization = (data: any): void => {
-    //     // Handle the new organization data here
-    //     console.log("New organization:", data)
-    // }
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getOrganisationList(token);
+            setListings(fetchedListings.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const navigateToEditPage = (org: any) => {
+        router.push(`/edit-organisation?id=${org.id}`);
+    };
+
+
+    useEffect(() => {
+        loadListings();
+    }, []); // Empty dependency array ensures it runs only once when the component mounts.
+
 
     return (
         <div className="container mx-auto py-6 space-y-4">
@@ -117,31 +119,31 @@ export default function SuperAdminDashboard() {
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Organization Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Subscription Type</TableHead>
-                                <TableHead>Account Manager</TableHead>
-                                <TableHead>Status</TableHead>
+                            <TableRow className="bg-gray-200">
+                                <TableHead className="font-bold text-lg text-black">Organization Name</TableHead>
+                                <TableHead className="font-bold text-lg text-black">Email</TableHead>
+                                <TableHead className="font-bold text-lg text-black">Subscription Type</TableHead>
+                                <TableHead className="font-bold text-lg text-black">Account Manager</TableHead>
+                                <TableHead className="font-bold text-lg text-black">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredData.map((org) => (
-                                <TableRow key={org.id} className="cursor-pointer hover:bg-muted/50">
-                                    <TableCell className="font-medium">
-                                        <Link href={`/edit-organisation`}>{org.name}</Link>
+                            {listings && listings.map((org: any) => (
+                                <TableRow key={org?.id} className="cursor-pointer hover:bg-gray-200/50" onClick={() => navigateToEditPage(org)}>
+                                    <TableCell className="font-medium" >
+                                        {org?.name}
                                     </TableCell>
-                                    <TableCell>{org.email}</TableCell>
-                                    <TableCell>{org.subscriptionType}</TableCell>
-                                    <TableCell>{org.accountManager}</TableCell>
+                                    <TableCell>{org?.contact_email}</TableCell>
+                                    <TableCell>{org?.latest_subscription_type}</TableCell>
+                                    <TableCell>{org?.account_manager_name}</TableCell>
                                     <TableCell>
                                         <Badge
                                             variant="outline"
                                             className={
-                                                org.status === "Active" ? "border-green-500 text-green-500" : "border-gray-500 text-gray-500"
+                                                org?.is_active ? "border-green-500 text-green-500" : "border-gray-500 text-gray-500"
                                             }
                                         >
-                                            {org.status}
+                                            {org?.is_active ? 'Active' : 'InActive'}
                                         </Badge>
                                     </TableCell>
                                 </TableRow>

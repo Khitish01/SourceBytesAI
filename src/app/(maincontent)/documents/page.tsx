@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -10,38 +10,98 @@ import { Action } from '@/components/Action'
 import { TbFilterCheck } from "react-icons/tb";
 import { PiFileArrowDownDuotone } from "react-icons/pi";
 import { RiFileUploadLine } from "react-icons/ri";
+import { useRouter } from 'next/navigation'
+import { deleteFile, getFileList } from '@/components/apicalls/tenant-file'
+import { AddDocumentModal } from './add-document-modal'
+import { useToast } from "@/hooks/use-toast"
 
 
 
 interface Document {
     id: string
-    name: string
-    lastModified: string
-    size: string
+    file_name: string
 }
 
 const DocumentPage = () => {
     const [entries, setEntries] = useState<number>(10)
-    const [documents] = useState<Document[]>([
-        { id: '1', name: 'IndoSakura_098yu.pdf', lastModified: '11-03-2024', size: '34 KB' },
-        { id: '2', name: 'IndoSakura_098yu.pdf', lastModified: '21-03-2024', size: '24 MB' },
-        { id: '3', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '4', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '5', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '6', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '7', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '8', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '9', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-        { id: '10', name: 'IndoSakura_098yu.pdf', lastModified: '22-03-2024', size: '20 KB' },
-    ])
+    const [loading, setLoading] = useState(true);
+    const [listings, setListings] = useState<any[]>([]);
+    const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedFile, setSelectedFile] = useState<Document | null>(null);
+    const { toast } = useToast()
+
+
+    const loadListings = async () => {
+        setLoading(true);
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+            const tenant_id = authDetails?.data?.tenant_id;
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getFileList(token, tenant_id);
+            console.log(fetchedListings);
+
+            setListings(fetchedListings.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCheckboxChange = (doc: Document) => {
+        setSelectedFile(selectedFile?.id === doc.id ? null : doc); // Toggle selection
+    };
+
+    const handleDelete = async () => {
+        if (!selectedFile) {
+            toast({ variant: "destructive", title: "Error", description: "No file selected!" });
+            return;
+        }
+        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+        const token = authDetails?.data?.token;
+        const tenant_id = authDetails?.data?.tenant_id;
+
+        const res = await deleteFile(token, tenant_id, selectedFile.id);
+        if (res.success) {
+            loadListings()
+            // setListings((prev) => prev.filter((file) => file.id !== selectedFile.id));
+            toast({ title: "Deleted", description: `${selectedFile.file_name} has been removed.` });
+            setSelectedFile(null);
+        }
+        else {
+            toast({ title: "Something went wrong", description: `${selectedFile.file_name} has not been removed.` });
+
+        }
+    };
+
+
+    useEffect(() => {
+        loadListings();
+    }, []); // Empty dependency array ensures it runs only once when the component mounts.
+
+
 
     return (
         <div className="p-4 md:p-6 max-w-[2000px] mx-auto">
             <div className="flex justify-end mb-3">
-                <Button className="bg-orange-500 hover:bg-orange-600 flex items-center">
+                <Button className="bg-orange-500 hover:bg-orange-600 flex items-center" onClick={() => setIsModalOpen(true)}>
                     <RiFileUploadLine className="h-4 w-4" />
                     Upload
                 </Button>
+                <AddDocumentModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSubmit={(data) => {
+                        // Handle the new organization data here
+                        console.log("New organization:", data)
+                    }}
+                />
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6">
@@ -68,25 +128,25 @@ const DocumentPage = () => {
                                         <input type="checkbox" className="rounded border-gray-300" />
                                     </TableHead>
                                     <TableHead className="min-w-[300px]">Name</TableHead>
-                                    <TableHead className="min-w-[200px]">Last Modified</TableHead>
-                                    <TableHead className="min-w-[150px]">Size</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {documents.map((doc) => (
+                                {listings && listings.map((doc: any) => (
                                     <TableRow key={doc.id}>
                                         <TableCell>
-                                            <input type="checkbox" className="rounded border-gray-300" />
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedFile?.id === doc.id}
+                                                onChange={() => handleCheckboxChange(doc)}
+                                                className="rounded border-gray-300" />
                                         </TableCell>
                                         <TableCell className="flex items-center gap-2">
                                             <svg className="h-5 w-5 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6C4.89543 2 4 2.89543 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                 <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
-                                            <span className="truncate">{doc.name}</span>
+                                            <span className="truncate">{doc.file_name}</span>
                                         </TableCell>
-                                        <TableCell>{doc.lastModified}</TableCell>
-                                        <TableCell>{doc.size}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -126,7 +186,7 @@ const DocumentPage = () => {
                     </div>
                 </div>
                 <div className="lg:min-w-[240px]">
-                    <Action />
+                    <Action selectedFile={selectedFile} onDelete={handleDelete} />
                 </div>
             </div>
         </div>

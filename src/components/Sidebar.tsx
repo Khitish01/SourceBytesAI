@@ -5,28 +5,34 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { Card } from './ui/card';
 import { TbLayoutSidebarFilled } from "react-icons/tb";
-import { getUserRole } from '@/app/utils/auth';
+import { useRouter } from "next/navigation"
+// import { getUserRole } from '@/app/utils/auth';
 
 
 
 
 export const Sidebar = () => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
     const [role, setRole] = useState<string | null>(null);
+    const router = useRouter()
 
     useEffect(() => {
         const fetchRole = async () => {
-            const userRole = await getUserRole();
+            const userRole = JSON.parse(localStorage.getItem('authDetails') as string).data.user_type
             setRole(userRole);
         };
 
         fetchRole();
     }, []);
+    const handleLogout = () => {
+        localStorage.removeItem('authDetails');
+        router.push('/')
+    }
 
     const menuItems = [
         { icon: Layout, label: 'Dashboard', href: '/dashboard' },
-        ...(role === 'super_admin'
-            ? [{ icon: FileText, label: 'Accounts', href: '/accounts' }]
+        ...(role === 'superuser'
+            ? [{ icon: FileText, label: 'Add Admin Accounts', href: '/accounts' }]
             : [{ icon: FileText, label: 'Documents', href: '/documents' }]),
         { icon: Settings, label: 'Settings', href: '/settings' },
     ];
@@ -34,8 +40,8 @@ export const Sidebar = () => {
     return (
         <aside
             className={cn(
-                'h-screen bg-zinc-800 text-white fixed left-0 top-0 z-50 flex flex-col transition-all duration-300 ease-in-out',
-                isExpanded ? 'w-48' : 'w-20'
+                'h-screen bg-zinc-800 text-white left-0 top-0 z-50 flex flex-col transition-all duration-300 ease-in-out',
+                isExpanded ? 'w-64' : 'w-20'
             )}
         >
             <div className="flex items-center justify-between p-4">
@@ -96,7 +102,7 @@ export const Sidebar = () => {
             </div>
 
             <div className="p-4 border-t border-white/10">
-                <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/10 text-left transition-all duration-300 ease-in-out">
+                <button onClick={handleLogout} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/10 text-left transition-all duration-300 ease-in-out">
                     <LogOut className="w-5 h-5" />
                     <span className={cn('whitespace-nowrap transition-all duration-300 ease-in-out',
                         isExpanded ? 'opacity-100' : 'opacity-0 w-0'
