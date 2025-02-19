@@ -70,7 +70,6 @@ const Accounts = () => {
 
     // const handleAddOrganization = (data: any): void => {
     //     // Handle the new organization data here
-    //     console.log("New organization:", data)
     // }
 
     const loadListings = async () => {

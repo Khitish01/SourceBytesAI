@@ -43,7 +43,6 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
         const token = authDetails?.data?.token;
         const { cpassword, ...formDataWithoutCpassword } = formData; // Remove cpassword safely
         const response = await createAdmin(token, formDataWithoutCpassword);
-        console.log(response);
 
         if (response.success) {
 

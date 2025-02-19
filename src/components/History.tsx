@@ -1,32 +1,99 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { CiTrash } from "react-icons/ci";
 import { History } from "lucide-react";
+import { deleteAllHistory, deleteHistoryById, getHistory } from './apicalls/chat';
+import { ConfirmationModal } from './confirmation-modal';
+interface ChatHistoryProps {
+    historyData: any
+    onHistorySelect: (selectedChat: any) => void
+}
+export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) => {
+    const [loading, setLoading] = useState(true);
+    const [listings, setListings] = useState<any[]>([]);
+    const [isModelOpen, setIsModalOpen] = useState<boolean>(false);
+    const [selectedId, setSelectedId] = useState<string>('')
 
-export const ChatHistory = () => {
-    const historyItems = [
-        { id: 1, title: "Previous conversation about AI", time: "2 hours ago" },
-        { id: 2, title: "Machine learning discussion", time: "Yesterday" },
-        { id: 3, title: "Data analysis query", time: "2 days ago" },
-        { id: 4, title: "Code optimization help", time: "3 days ago" },
-    ];
+    const loadListings = async () => {
+        setLoading(true);
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getHistory(token);
+            setListings(fetchedListings.data);
+            historyData ? setSelectedId(historyData) : setSelectedId('')
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        loadListings();
+
+        // setSelectedId(historyData?.id)
+    }, [historyData]);
+
+
+    const handleDelete = async () => {
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+            const tenant_id = authDetails?.data?.tenant_id;
+
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+            if (selectedId == '') {
+
+                const fetchedListings = await deleteAllHistory(token, tenant_id);
+            }
+            else {
+                const dd = await deleteHistoryById(token, selectedId, tenant_id)
+            }
+            setIsModalOpen(false)
+            setSelectedId('')
+            loadListings();
+            onHistorySelect(null)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    const handleCheckboxChange = (item: any) => {
+        const newSelectedId = selectedId === item.id ? null : item.id
+        setSelectedId(newSelectedId)
+        onHistorySelect(newSelectedId ? item : null)
+    }
+
     return (
-        <aside className="w-80 border-l border-zinc-200 p-4 hidden lg:flex flex-col">
+        <aside className="w-80 border-l border-zinc-200 p-4 hidden lg:flex flex-col h-[calc(100vh-100px)]">
             <div className="flex items-center gap-2 mb-6">
                 <History className="w-5 h-5 text-zinc-700" />
                 <h2 className="text-lg font-semibold">History</h2>
             </div>
             <div className="space-y-4 flex-grow overflow-y-auto">
-                {historyItems.map((item) => (
+                {listings.map((item) => (
                     <div
                         key={item.id}
                         className="p-3 rounded-lg hover:bg-zinc-50 cursor-pointer transition-colors border border-zinc-200"
                     >
                         <div className="flex items-start gap-3">
-                            <Checkbox className="w-4 h-4 text-zinc-500 mt-1" />
+                            <Checkbox className="w-4 h-4 text-zinc-500 mt-1"
+                                checked={selectedId === item.id}
+                                onCheckedChange={() => handleCheckboxChange(item)}
+                            />
                             <div>
-                                <h3 className="text-sm font-medium text-zinc-900">{item.title}</h3>
-                                <p className="text-xs text-zinc-500 mt-1">{item.time}</p>
+                                <h3 className="text-sm font-medium text-zinc-900">{item.name}</h3>
+                                <p className="text-xs text-zinc-500 mt-1">{item.created_at}</p>
                             </div>
                         </div>
                     </div>
@@ -34,10 +101,13 @@ export const ChatHistory = () => {
             </div>
 
             {/* Delete Button Stays at Bottom */}
-            <button className="p-3 mt-4 w-full bg-zinc-100 text-zinc-400 hover:bg-slate-200 text-sm rounded-lg transition-colors shrink-0 flex items-center justify-center">
+            <button className="p-3 mt-4 w-full bg-zinc-100 text-zinc-800 shadow-xl hover:bg-slate-200 text-sm rounded-lg transition-colors shrink-0 flex items-center justify-center"
+                onClick={() => setIsModalOpen(true)}
+            >
                 <CiTrash className="w-4 h-4 text-zinc-500 mr-1" />
                 Clear History
             </button>
+            <ConfirmationModal isOpen={isModelOpen} onClose={() => setIsModalOpen(false)} onDelete={handleDelete} />
         </aside>
     )
 }

@@ -39,7 +39,6 @@ export async function uploadFile(token: string, formData: FormData, tenant_id: s
     }
 
     try {
-        console.log("Uploading image...");
         const response = await fetch(
             `https://app.sourcebytes.ai/api/v1/tenants/${tenant_id}/upload-file/`,
             {
@@ -51,7 +50,6 @@ export async function uploadFile(token: string, formData: FormData, tenant_id: s
                 body: formData,
             },
         );
-        console.log(response);
 
 
         if (!response.ok) {
@@ -61,10 +59,8 @@ export async function uploadFile(token: string, formData: FormData, tenant_id: s
         }
 
         const data = await response.json();
-        // console.log("Image upload response:", data);
         return data;
     } catch (error) {
-        // console.error("Error in uploadImage:", error);
         throw error;
     }
 }

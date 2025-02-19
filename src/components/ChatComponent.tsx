@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CiMicrophoneOn } from "react-icons/ci"
 import { ChatHistory } from "@/components/History"
 import { FiCopy } from "react-icons/fi"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { FaPlay } from "react-icons/fa"
+import { getChatHistory, sendChat } from "./apicalls/chat"
+import { useToast } from "@/hooks/use-toast"
 
 // Dummy AI responses
 const dummyResponses = [
@@ -24,60 +26,142 @@ interface Message {
 }
 
 export const ChatComponent = () => {
-    const [messages, setMessages] = useState<Message[]>([])
+    const [messages, setMessages] = useState<any[]>([])
     const [inputText, setInputText] = useState("")
+    const [selectedHistory, setSelectedHistory] = useState<any>(null)
+    const [newChat, setNewChat] = useState<any>(null)
+    const { toast } = useToast()
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (inputText.trim() === "") return
-
+        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+        const token = authDetails?.data?.token;
         // Add user message
-        const userMessage: Message = {
-            id: Date.now(),
-            text: inputText,
-            isUser: true,
-        }
-        setMessages((prevMessages) => [...prevMessages, userMessage])
+        // const userMessage: Message = {
+        //     id: Date.now(),
+        //     text: inputText,
+        //     isUser: true,
+        // }
 
-        // Simulate AI response
-        setTimeout(() => {
-            const aiResponse: Message = {
-                id: Date.now() + 1,
-                text: dummyResponses[Math.floor(Math.random() * dummyResponses.length)],
-                isUser: false,
+        if (selectedHistory) {
+            loadListings(selectedHistory)
+            const chatResponse = await sendChat(token, { message: inputText, conversation_id: selectedHistory?.id })
+
+            const userMessage = {
+                id: chatResponse.data.data.user_message.id,
+                message: chatResponse.data.data.user_message.message,
+                message_author_type: "user",
+                conversation_id: chatResponse.data.data.user_message.conversation_id,
+                created_at: chatResponse.data.data.user_message.created_at,
+                updated_at: chatResponse.data.data.user_message.updated_at
             }
-            setMessages((prevMessages) => [...prevMessages, aiResponse])
-        }, 1000)
+            setMessages((prevMessages) => [...prevMessages, userMessage])
+            setTimeout(() => {
+                const agentMessage = {
+                    id: chatResponse.data.data.assistant_response.id,
+                    message: chatResponse.data.data.assistant_response.message,
+                    message_author_type: "assistant",
+                    conversation_id: chatResponse.data.data.assistant_response.conversation_id,
+                    created_at: chatResponse.data.data.assistant_response.created_at,
+                    updated_at: chatResponse.data.data.assistant_response.updated_at
+                }
+                setMessages((prevMessages) => [...prevMessages, agentMessage])
+            })
+        }
+        else {
+            const chatResponse = await sendChat(token, { message: inputText, conversation_id: '' })
+
+            const userMessage = {
+                id: chatResponse.data.data.user_message.id,
+                message: chatResponse.data.data.user_message.message,
+                message_author_type: "user",
+                conversation_id: chatResponse.data.data.user_message.conversation_id,
+                created_at: chatResponse.data.data.user_message.created_at,
+                updated_at: chatResponse.data.data.user_message.updated_at
+            }
+            setMessages((prevMessages) => [...prevMessages, userMessage])
+            setTimeout(() => {
+                const agentMessage = {
+                    id: chatResponse.data.data.assistant_response.id,
+                    message: chatResponse.data.data.assistant_response.message,
+                    message_author_type: "assistant",
+                    conversation_id: chatResponse.data.data.assistant_response.conversation_id,
+                    created_at: chatResponse.data.data.assistant_response.created_at,
+                    updated_at: chatResponse.data.data.assistant_response.updated_at
+                }
+                setMessages((prevMessages) => [...prevMessages, agentMessage])
+                setNewChat(agentMessage.conversation_id)
+                setSelectedHistory({
+                    created_at: userMessage.created_at,
+                    id: userMessage.conversation_id,
+                    name: userMessage.message,
+                    updated_at: userMessage.updated_at
+                })
+            })
+        }
 
         setInputText("")
     }
 
     const handleCopyMessage = (text: string) => {
         navigator.clipboard.writeText(text).then(() => {
-            alert("Message copied to clipboard!")
+            toast({ title: "Copied", description: `Message copied to clipboard!` });
         })
     }
 
     const handleRegenerateResponse = () => {
-        if (messages.length > 0) {
-            const aiResponse: Message = {
-                id: Date.now(),
-                text: dummyResponses[Math.floor(Math.random() * dummyResponses.length)],
-                isUser: false,
-            }
-            setMessages((prevMessages) => [...prevMessages, aiResponse])
-        }
+        // if (messages.length > 0) {
+        //     const aiResponse: Message = {
+        //         id: Date.now(),
+        //         text: dummyResponses[Math.floor(Math.random() * dummyResponses.length)],
+        //         isUser: false,
+        //     }
+        //     setMessages((prevMessages) => [...prevMessages, aiResponse])
+        // }
     }
 
     const handlePlayMessage = (text: string) => {
         const utterance = new SpeechSynthesisUtterance(text)
         speechSynthesis.speak(utterance)
     }
+    const loadListings = async (selectedHistory: any) => {
+        // setLoading(true);
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getChatHistory(token, selectedHistory?.id);
+            setMessages(fetchedListings?.data?.messages)
+
+            // setListings(fetchedListings.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            // setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedHistory) {
+            // Here you can handle the selected history item
+            // For example, you could load the chat messages associated with this history
+            loadListings(selectedHistory)
+        }
+        else {
+            setMessages([])
+        }
+    }, [selectedHistory])
 
     return (
-        <div className="min-h-screen bg-white text-zinc-900 flex">
+        <div className=" bg-white text-zinc-900 flex">
             <div className="flex-1 flex flex-col ml-20">
-                <div className="flex-1 flex relative">
-                    <main className="flex-1 flex flex-col p-6 max-w-4xl mx-auto w-full relative">
+                <div className="flex-1 flex relative ">
+                    <main className="flex-1 flex flex-col p-6 max-w-4xl mx-auto w-full relative h-[calc(100vh-100px)]">
                         <div className={`flex-1 overflow-y-auto ${messages.length > 0 ? 'mb-20' : ''}`}>
                             {messages.length === 0 ? (
                                 <div className="h-[calc(100vh-12rem)] flex items-center justify-center">
@@ -90,9 +174,9 @@ export const ChatComponent = () => {
                                     {messages.map((message) => (
                                         <div
                                             key={message.id}
-                                            className={`flex ${message.isUser ? 'justify-end' : 'justify-start items-start'}`}
+                                            className={`flex ${message.message_author_type == 'user' ? 'justify-end' : 'justify-start items-start'}`}
                                         >
-                                            {!message.isUser && (
+                                            {!(message.message_author_type == 'user') && (
                                                 <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center mr-1 shrink-0 mt-4 overflow-hidden">
                                                     <Image
                                                         src="/SYEEKBYET LOGO bg 2.svg"
@@ -104,13 +188,13 @@ export const ChatComponent = () => {
                                                 </div>
 
                                             )}
-                                            <div className={`p-6 rounded-2xl max-w-[80%] ${message.isUser ? "bg-orange-100" : "bg-zinc-100 ml-8"} group relative flex items-center gap-2`}>
-                                                <p className="text-sm flex-1">{message.text}</p>
+                                            <div className={`p-6 rounded-2xl max-w-[80%] ${message.message_author_type == 'user' ? "bg-orange-100" : "bg-zinc-100 ml-8"} group relative flex items-center gap-2`}>
+                                                <p className="text-sm flex-1">{message.message}</p>
 
                                                 {/* Play button - only shown on assistant messages */}
-                                                {!message.isUser && (
+                                                {!(message.message_author_type == 'user') && (
                                                     <button
-                                                        onClick={() => handlePlayMessage(message.text)}
+                                                        onClick={() => handlePlayMessage(message.message)}
                                                         className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center shrink-0 overflow-hidden"
                                                     >
                                                         <FaPlay className="text-gray-400 text-xs" />
@@ -118,7 +202,7 @@ export const ChatComponent = () => {
                                                 )}
 
                                                 <button
-                                                    onClick={() => handleCopyMessage(message.text)}
+                                                    onClick={() => handleCopyMessage(message.message)}
                                                     className="text-zinc-500 hover:text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                                 >
                                                     <FiCopy className="w-4 h-4" />
@@ -191,7 +275,7 @@ export const ChatComponent = () => {
                             </button>
                         </div>
                     </main>
-                    <ChatHistory />
+                    <ChatHistory historyData={newChat} onHistorySelect={setSelectedHistory} />
                 </div>
             </div>
         </div>

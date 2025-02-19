@@ -44,7 +44,6 @@ const DocumentPage = () => {
             }
 
             const fetchedListings = await getFileList(token, tenant_id);
-            console.log(fetchedListings);
 
             setListings(fetchedListings.data);
         } catch (error) {
@@ -99,7 +98,6 @@ const DocumentPage = () => {
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={(data) => {
                         // Handle the new organization data here
-                        console.log("New organization:", data)
                     }}
                 />
             </div>

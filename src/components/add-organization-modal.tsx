@@ -44,8 +44,6 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
         const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
         const token = authDetails?.data?.token;
         const response = await createOrganisation(token, formData);
-        console.log(formData);
-        console.log(response);
 
         onClose()
     }

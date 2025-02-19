@@ -88,7 +88,6 @@ export default function SuperAdminDashboard() {
                         onClose={() => setIsModalOpen(false)}
                         onSubmit={(data) => {
                             // Handle the new organization data here
-                            console.log("New organization:", data)
                         }}
                     // onSubmit={handleAddOrganization}
                     />

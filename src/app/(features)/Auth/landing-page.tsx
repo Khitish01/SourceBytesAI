@@ -17,7 +17,6 @@ export default function LandingPage() {
             if (email && email.includes("@")) {
                 setShowOtp(true)
                 // Here you would typically send the OTP to the user's email
-                console.log("Sending OTP to", email)
             } else {
                 alert("Please enter a valid email address")
             }
@@ -25,7 +24,6 @@ export default function LandingPage() {
             // Validate OTP
             // if (otp && otp.length === 6) {
             //     // Here you would typically verify the OTP
-            //     console.log("Verifying OTP", otp)
             //     // alert("OTP verified successfully!")
             //     router.push('/dashboard');
 
@@ -33,15 +31,12 @@ export default function LandingPage() {
             //     alert("Please enter a valid 6-digit OTP")
 
             // }
-            console.log('sending request');
-            console.log({ email, password });
             const response = await login({ email, password })
 
             if (response.success) {
 
                 localStorage.setItem('authDetails', JSON.stringify(response))
                 router.push('/dashboard')
-                // console.log(response + '   getting response');
             }
         }
     }

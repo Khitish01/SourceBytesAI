@@ -27,7 +27,6 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0] || null;
-        console.log(selectedFile);
         
         setFile(selectedFile);
     };
@@ -53,8 +52,6 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
         const tenant_id = authDetails?.data?.tenant_id;
 
         const response = await uploadFile(token, formData, tenant_id);
-        console.log(formData);
-        console.log(response);
 
         onClose()
     }

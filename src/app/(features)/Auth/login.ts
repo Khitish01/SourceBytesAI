@@ -10,8 +10,6 @@ export async function login(
     formData: form,
 ): Promise<any> {
     try {
-        console.log(formData);
-        
         const response = await fetch(
             "https://app.sourcebytes.ai/api/v1/auth/login/",
             {
@@ -22,7 +20,6 @@ export async function login(
                 body: JSON.stringify(formData),
             },
         );
-        console.log(response);
         
 
         const data = await response.json();

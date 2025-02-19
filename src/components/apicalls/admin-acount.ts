@@ -58,7 +58,6 @@ export async function createAdmin(token: string, formData: AdminFormData): Promi
                 error: data.message || "Fetching organizations failed",
             };
         }
-        console.log(data);
 
         return { success: true, data };
     } catch (error) {
