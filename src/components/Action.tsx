@@ -19,23 +19,21 @@ export const Action = ({ selectedFile, onDelete }: ActionProps) => {
             <h2 className="text-base font-medium mb-4">Actions:</h2>
 
             <div className="space-y-4">
-                {/* Download Action */}
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+
+                {/* <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
                     <Download className="h-4 w-4" />
                     Download
                 </button>
 
-                {/* Share Action */}
                 <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
                     <Share className="h-4 w-4" />
                     Share
                 </button>
 
-                {/* Preview Action */}
                 <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
                     <Eye className="h-4 w-4" />
                     Preview
-                </button>
+                </button> */}
 
                 {/* Delete Action */}
                 <button className="w-full flex items-center gap-2 px-3 py-2 mt-6 text-sm text-red-500 border border-red-500 rounded-md hover:bg-red-50 transition-colors"

@@ -27,7 +27,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0] || null;
-        
+
         setFile(selectedFile);
     };
 
@@ -53,7 +53,11 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
 
         const response = await uploadFile(token, formData, tenant_id);
 
-        onClose()
+        if (response.success) {
+
+            onClose()
+        }
+
     }
 
     const loadOrganisations = async () => {

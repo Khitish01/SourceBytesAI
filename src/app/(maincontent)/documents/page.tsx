@@ -95,7 +95,10 @@ const DocumentPage = () => {
                 </Button>
                 <AddDocumentModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={() => {
+                        setIsModalOpen(false)
+                        loadListings()
+                    }}
                     onSubmit={(data) => {
                         // Handle the new organization data here
                     }}

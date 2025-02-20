@@ -44,7 +44,7 @@ export async function uploadFile(token: string, formData: FormData, tenant_id: s
             {
                 method: "POST",
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    // "Content-Type": "multipart/form-data",
                     "Authorization": `Token ${token}`
                 },
                 body: formData,
@@ -54,14 +54,16 @@ export async function uploadFile(token: string, formData: FormData, tenant_id: s
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("Image upload failed:", errorText);
-            throw new Error(`Failed to upload image: ${errorText}`);
+            return { errorText, success: false };
+            // console.error("Image upload failed:", errorText);
+            // throw new Error(`Failed to upload image: ${errorText}`);
         }
 
         const data = await response.json();
-        return data;
+        return { data, success: true };
     } catch (error) {
-        throw error;
+        return { error, success: false };
+        // throw error;
     }
 }
 

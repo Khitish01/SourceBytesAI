@@ -51,9 +51,9 @@ export const Sidebar = () => {
                         alt="SourceBytes.AI Logo"
                         width={20}
                         height={20}
-                        className="w-[20px] h-[20px]"
+                        className="w-[25px] h-[25px]"
                     />
-                    <span className={cn('font-semibold text-sm whitespace-nowrap transition-all duration-300 ease-in-out',
+                    <span className={cn('font-semibold text-xl whitespace-nowrap transition-all duration-300 ease-in-out',
                         isExpanded ? 'block' : 'hidden'
                     )}>
                         SourceBytes.AI
@@ -61,7 +61,7 @@ export const Sidebar = () => {
                 </div>
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out"
+                    className="p-2 rounded-lg text-lg hover:bg-white/10 transition-all duration-300 ease-in-out"
                 >
                     <TbLayoutSidebarFilled className='h-5 w-5 pointer-events-auto' />
                 </button>
@@ -72,7 +72,7 @@ export const Sidebar = () => {
                     <a
                         key={item.label}
                         href={item.href}
-                        className="flex items-center gap-3 py-3 rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out"
+                        className="flex items-center text-xl gap-3 py-3 rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out"
                     >
                         <item.icon className="w-5 h-5 text-[#EF6A37]" />
                         <span className={cn('whitespace-nowrap transition-all duration-300 ease-in-out',
@@ -84,7 +84,7 @@ export const Sidebar = () => {
                 ))}
             </nav>
             <div className="px-4 mb-4">
-                <Card className={cn('relative overflow-hidden bg-gradient-to-b from-[#eb9471] to-[#d05524] text-white p-6',
+                <Card className={cn('relative overflow-hidden bg-gradient-to-b from-[#eb9471] to-[#d05524] text-white p-6 border-none',
                     isExpanded ? 'opacity-100' : 'opacity-0 w-0'
                 )}>
                     <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full transform translate-x-8 -translate-y-8" />
@@ -103,7 +103,7 @@ export const Sidebar = () => {
 
             <div className="p-3 border-t border-white/10">
                 <button onClick={handleLogout}
-                    className={cn('flex items-center w-full p-3 rounded-lg hover:bg-white/10 text-left transition-all duration-300 ease-in-out',
+                    className={cn('flex items-center w-full p-3 text-xl rounded-lg hover:bg-white/10 text-left transition-all duration-300 ease-in-out',
                         isExpanded ? 'gap-3' : 'gap-0'
                     )}>
                     <LogOut className="w-5 h-5" />

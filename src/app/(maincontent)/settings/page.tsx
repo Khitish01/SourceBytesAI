@@ -77,8 +77,8 @@ export default function Settings() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="english">English</SelectItem>
-                            <SelectItem value="spanish">Spanish</SelectItem>
-                            <SelectItem value="french">French</SelectItem>
+                            <SelectItem value="japanese">Japanese</SelectItem>
+                            {/* <SelectItem value="french">French</SelectItem> */}
                         </SelectContent>
                     </Select>
                 </div>
