@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getOrganisationList } from "@/components/apicalls/organisation"
 import { createAdmin } from "@/components/apicalls/admin-acount"
 import { uploadFile } from "@/components/apicalls/tenant-file"
+import { Loader2 } from "lucide-react"
 // import { createOrganisation } from "./apicalls/organisation"
 
 interface AddDocumentModalProps {
@@ -23,6 +24,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
     const [listings, setListings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [file, setFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false)
 
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,56 +41,36 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
             console.error("No file selected");
             return;
         }
-
+        setIsUploading(true)
         const formData = new FormData();
         formData.append('file', file);
 
 
 
-        // onSubmit(formData)
-        // setFormData(formData)
-        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
-        const token = authDetails?.data?.token;
-        const tenant_id = authDetails?.data?.tenant_id;
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const token = authDetails?.data?.token
+            const tenant_id = authDetails?.data?.tenant_id
 
-        const response = await uploadFile(token, formData, tenant_id);
+            const response = await uploadFile(token, formData, tenant_id)
 
-        if (response.success) {
-
-            onClose()
+            if (response.success) {
+                onClose()
+            } else {
+                // Handle error
+                console.error("Upload failed:", response.message)
+                alert("Upload failed. Please try again.")
+            }
+        } catch (error) {
+            console.error("Upload error:", error)
+            alert("An error occurred during upload. Please try again.")
+        } finally {
+            setIsUploading(false)
         }
 
     }
 
-    const loadOrganisations = async () => {
-        setLoading(true);
-        try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
-            const token = authDetails?.data?.token;
 
-            if (!token) {
-                console.error("No auth token found");
-                return;
-            }
-
-            const fetchedListings = await getOrganisationList(token);
-            setListings(fetchedListings.data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadOrganisations();
-    }, []); // Empty dependency array ensures it runs only once when the component mounts.
-
-
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const { name, value } = e.target
-    //     setFormData((prev) => ({ ...prev, [name]: value }))
-    // }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -107,6 +89,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
                                 type="file"
                                 onChange={handleFileChange}
                                 accept=".pdf"
+                                disabled={isUploading}
                             />
                         </div>
                         {/* <div className="grid gap-2">
@@ -132,8 +115,17 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
                             <Input type="password" autoComplete="off" id="cpassword" name="cpassword" value={formData.cpassword} onChange={handleChange} />
                         </div> */}
                     </div>
-                    <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-                        Add Document
+                    <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600"
+                        disabled={isUploading || !file}
+                    >
+                        {isUploading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                            </>
+                        ) : (
+                            "Add Document"
+                        )}
                     </Button>
                 </form>
             </DialogContent>

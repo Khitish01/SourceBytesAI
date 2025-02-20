@@ -7,6 +7,7 @@ import { login } from "./login";
 
 export default function LandingPage() {
     const [email, setEmail] = useState("")
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [password, setPassword] = useState("")
     const [showOtp, setShowOtp] = useState(false)
     const router = useRouter();
@@ -21,22 +22,22 @@ export default function LandingPage() {
                 alert("Please enter a valid email address")
             }
         } else {
-            // Validate OTP
-            // if (otp && otp.length === 6) {
-            //     // Here you would typically verify the OTP
-            //     // alert("OTP verified successfully!")
-            //     router.push('/dashboard');
+            setIsLoading(true)
+            try {
+                const response = await login({ email, password })
 
-            // } else {
-            //     alert("Please enter a valid 6-digit OTP")
-
-            // }
-            const response = await login({ email, password })
-
-            if (response.success) {
-
-                localStorage.setItem('authDetails', JSON.stringify(response))
-                router.push('/dashboard')
+                if (response.success) {
+                    localStorage.setItem("authDetails", JSON.stringify(response))
+                    router.push("/dashboard")
+                } else {
+                    // Handle login failure
+                    alert("Login failed. Please check your credentials and try again.")
+                }
+            } catch (error) {
+                console.error("Login error:", error)
+                alert("An error occurred during login. Please try again.")
+            } finally {
+                setIsLoading(false)
             }
         }
     }
@@ -132,7 +133,7 @@ export default function LandingPage() {
                                     />
                                 ) : (
                                     <input
-                                        type="text"
+                                        type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
@@ -142,7 +143,9 @@ export default function LandingPage() {
                                 )}
                                 <button
                                     onClick={handleSubmit}
-                                    className="w-full px-4 py-3 bg-[#EF6A37] text-white rounded-lg font-medium hover:bg-[#EF6A37]/85 transition-colors text-sm"
+                                    className={`w-full px-4 py-3 bg-[#EF6A37] text-white rounded-lg font-medium transition-colors text-sm ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#EF6A37]/85"
+                                        }`}
+                                    disabled={isLoading}
                                 >
                                     {showOtp ? "Login" : "Continue"}
                                 </button>
