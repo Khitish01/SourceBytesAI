@@ -81,7 +81,7 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
                 <h2 className="text-lg font-semibold">History</h2>
             </div>
             <div className="space-y-4 flex-grow overflow-y-auto">
-                {listings.map((item) => (
+                {listings && listings.map((item) => (
                     <div
                         key={item.id}
                         className="p-3 rounded-lg hover:bg-zinc-50 cursor-pointer transition-colors border border-zinc-200"
