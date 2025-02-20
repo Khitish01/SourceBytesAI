@@ -102,7 +102,7 @@ export default function LandingPage() {
             <div className="relative z-10 w-full lg:w-3/5 py-4 px-4 sm:p-4 flex-1">
                 <div className="w-full h-full bg-white rounded-2xl p-6 sm:p-8 md:p-10 lg:p-16 shadow-xl">
                     <div className="flex flex-col h-full">
-                        <div className="h-[calc(100vh-400px)] flex flex-col justify-end flex-auto">
+                        <div className="h-[calc(100vh-400px)] flex flex-col justify-end flex-auto mb-28">
                             <div className="mb-6 sm:mb-8 lg:mb-12">
                                 <div className="w-10 sm:w-12 h-10 sm:h-12 bg-sourcebytes/10 rounded-lg flex items-center justify-center mb-4 sm:mb-8">
                                     <Image
