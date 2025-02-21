@@ -42,7 +42,7 @@ export const Sidebar = () => {
         <aside
             className={cn(
                 'h-screen bg-zinc-800 text-white left-0 top-0 z-50 flex flex-col transition-all duration-300 ease-in-out',
-                isExpanded ? 'max-w-80' : 'w-20'
+                isExpanded ? 'w-80' : 'w-20'
             )}
         >
             <div className={`flex items-center justify-between ${isExpanded ? 'p-4' : 'py-4 px-2'}`}>
