@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,17 +9,69 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { editAdminProfile, getAdminProfile } from "@/components/apicalls/profile"
+import { useToast } from "@/hooks/use-toast"
 
 export default function Settings() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [name, setName] = useState("Khitish Mangal")
     const [email, setEmail] = useState("khitish@gmail.com")
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const [loading, setLoading] = useState(true);
+    const [profile, setProfile] = useState<any>(null);
+    const [avatar, setAvatar] = useState<string>('');
+    const { toast } = useToast()
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        setLoading(true)
+        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+        const token = authDetails?.data?.token
+        const data = await editAdminProfile(token, { name, email })
+        setLoading(false)
+
+        if (data.success) {
+            // router.push("/dashboard")
+            toast({ title: "Edited Successfully", description: `Profile has been edited successfully.` })
+            setIsEditModalOpen(false)
+            getAdminProfileDetails()
+        } else {
+            toast({ variant: "destructive", title: "Error", description: "Something went wrong!" })
+        }
+
+
+
         // Here you would typically send the updated data to your backend
-        setIsEditModalOpen(false)
     }
+
+
+    const getAdminProfileDetails = async () => {
+        setLoading(true);
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+            if (!token) {
+                console.error("No auth token found");
+                return;
+            }
+
+            const fetchedListings = await getAdminProfile(token);
+
+            setProfile(fetchedListings.data.data);
+            const nameAvatar = fetchedListings.data.data.name.split(' ')
+            setName(fetchedListings.data.data.name)
+            setEmail(fetchedListings.data.data.email)
+
+            setAvatar(nameAvatar?.[0].charAt(0) + nameAvatar?.[1].charAt(0))
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getAdminProfileDetails();
+    }, []);
 
     return (
         <div className="container mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6 lg:gap-8 max-w-6xl">
@@ -35,11 +87,11 @@ export default function Settings() {
                                         src="/jck"
                                         alt="Profile picture"
                                     />
-                                    <AvatarFallback className="text-black">KM</AvatarFallback>
+                                    <AvatarFallback className="text-black">{avatar}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold truncate">{name}</h3>
-                                    <p className="text-xs sm:text-sm text-gray-300 truncate">{email}</p>
+                                    <h3 className="font-semibold truncate">{profile?.name}</h3>
+                                    <p className="text-xs sm:text-sm text-gray-300 truncate">{profile?.email}</p>
                                 </div>
                                 <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                                     <DialogTrigger asChild>

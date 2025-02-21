@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { Card } from './ui/card';
 import { TbLayoutSidebarFilled } from "react-icons/tb";
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 // import { getUserRole } from '@/app/utils/auth';
 
 
@@ -15,6 +15,7 @@ export const Sidebar = () => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [role, setRole] = useState<string | null>(null);
     const router = useRouter()
+    const pathname = usePathname()
 
     useEffect(() => {
         const fetchRole = async () => {
@@ -44,7 +45,7 @@ export const Sidebar = () => {
                 isExpanded ? 'w-64' : 'w-20'
             )}
         >
-            <div className="flex items-center justify-between p-3">
+            <div className={`flex items-center justify-between ${isExpanded ? 'p-4' : 'py-4 px-2'}`}>
                 <div className={cn('flex items-center', isExpanded ? 'gap-3' : 'gap-0')}>
                     <Image
                         src="/SYEEKBYET LOGO bg 1.svg"
@@ -71,12 +72,12 @@ export const Sidebar = () => {
                 {menuItems.map((item) => (
                     <a
                         key={item.label}
-                        href={item.href}
-                        className="flex items-center text-xl gap-3 py-3 rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out"
+                        onClick={() => { router.push(item.href) }}
+                        className={`flex ${pathname == item.href ? 'bg-white/25 font-extrabold' : ''} cursor-pointer  items-center text-xl gap-3 ${isExpanded ? 'p-3' : 'py-3 justify-center'} rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out`}
                     >
-                        <item.icon className="w-5 h-5 text-[#EF6A37]" />
+                        <item.icon className={`w-5 h-5 ${pathname == item.href ? 'text-[#EF6A37]' : ''}`} />
                         <span className={cn('whitespace-nowrap transition-all duration-300 ease-in-out',
-                            isExpanded ? 'opacity-100' : 'opacity-0 w-0'
+                            isExpanded ? 'block' : 'hidden'
                         )}>
                             {item.label}
                         </span>
