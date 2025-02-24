@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createOrganisation } from "./apicalls/organisation"
+import { Loader2 } from "lucide-react"
 
 interface AddOrganizationModalProps {
     isOpen: boolean
@@ -36,16 +37,21 @@ const initialFormData: OrganizationFormData = {
 
 export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalProps) {
     const [formData, setFormData] = useState<OrganizationFormData>(initialFormData)
+    const [isLoading, setIsLoading] = useState(false) // Added loading state
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // onSubmit(formData)
-        // setFormData(formData)
-        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
-        const token = authDetails?.data?.token;
-        const response = await createOrganisation(token, formData);
-
-        onClose()
+        setIsLoading(true) // Set loading to true when submission starts
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const token = authDetails?.data?.token
+            const response = await createOrganisation(token, formData)
+            onClose()
+        } catch (error) {
+            console.error("Error creating organization:", error)
+        } finally {
+            setIsLoading(false) // Reset loading state when done
+        }
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,12 +127,22 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-                        Add Organization
+                    <Button
+                        type="submit"
+                        className="w-full bg-orange-500 hover:bg-orange-600"
+                        disabled={isLoading} // Disable button while loading
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Adding Organization...
+                            </>
+                        ) : (
+                            "Add Organization"
+                        )}
                     </Button>
                 </form>
             </DialogContent>
         </Dialog>
     )
 }
-

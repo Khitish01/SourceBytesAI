@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getOrganisationList } from "@/components/apicalls/organisation"
 import { createAdmin } from "@/components/apicalls/admin-acount"
-// import { createOrganisation } from "./apicalls/organisation"
+import { Loader2 } from "lucide-react"
 
 interface AddAdminModalProps {
     isOpen: boolean
@@ -19,7 +19,7 @@ interface AdminFormData {
     name: string
     tenant_id: string
     password: string
-    email: string,
+    email: string
     cpassword: string
 }
 
@@ -33,48 +33,53 @@ const initialFormData: AdminFormData = {
 
 export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
     const [formData, setFormData] = useState<AdminFormData>(initialFormData)
-    const [listings, setListings] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [listings, setListings] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false) // Added loading state for form submission
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // onSubmit(formData)
-        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
-        const token = authDetails?.data?.token;
-        const { cpassword, ...formDataWithoutCpassword } = formData; // Remove cpassword safely
-        const response = await createAdmin(token, formDataWithoutCpassword);
+        setIsLoading(true) // Set loading state to true when submission starts
+        try {
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const token = authDetails?.data?.token
+            const { cpassword, ...formDataWithoutCpassword } = formData
+            const response = await createAdmin(token, formDataWithoutCpassword)
 
-        if (response.success) {
-
-            setFormData(initialFormData)
-            onClose()
+            if (response.success) {
+                setFormData(initialFormData)
+                onClose()
+            }
+        } catch (error) {
+            console.error("Error creating admin:", error)
+        } finally {
+            setIsLoading(false) // Reset loading state when done
         }
     }
 
     const loadOrganisations = async () => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
-            const token = authDetails?.data?.token;
+            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const token = authDetails?.data?.token
 
             if (!token) {
-                console.error("No auth token found");
-                return;
+                console.error("No auth token found")
+                return
             }
 
-            const fetchedListings = await getOrganisationList(token);
-            setListings(fetchedListings.data);
+            const fetchedListings = await getOrganisationList(token)
+            setListings(fetchedListings.data)
         } catch (error) {
-            console.error(error);
+            console.error(error)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
-        loadOrganisations();
-    }, []); // Empty dependency array ensures it runs only once when the component mounts.
-
+        loadOrganisations()
+    }, [])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -91,7 +96,6 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                     <div className="grid w-full gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="tenant_id">Select Organization *</Label>
-                            {/* <Input id="tenant_id" name="tenant_id" value={formData.name} onChange={handleChange} required /> */}
                             <Select
                                 value={formData.tenant_id}
                                 onValueChange={(value) => setFormData((prev) => ({ ...prev, tenant_id: value }))}
@@ -118,23 +122,55 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="email">Email*</Label>
-                            <Input id="email" autoComplete="" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                            <Input
+                                id="email"
+                                autoComplete=""
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Create Password</Label>
-                            <Input type="password" autoComplete="off" id="password" name="password" value={formData.password} onChange={handleChange} />
+                            <Input
+                                type="password"
+                                autoComplete="off"
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="cpassword">Confirm Password</Label>
-                            <Input type="password" autoComplete="off" id="cpassword" name="cpassword" value={formData.cpassword} onChange={handleChange} />
+                            <Input
+                                type="password"
+                                autoComplete="off"
+                                id="cpassword"
+                                name="cpassword"
+                                value={formData.cpassword}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
-                    <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-                        Add Organization
+                    <Button
+                        type="submit"
+                        className="w-full bg-orange-500 hover:bg-orange-600"
+                        disabled={isLoading} // Disable button while loading
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Adding Admin...
+                            </>
+                        ) : (
+                            "Add Admin"
+                        )}
                     </Button>
                 </form>
             </DialogContent>
         </Dialog>
     )
 }
-

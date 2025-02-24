@@ -1,15 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getOrganisationList } from "@/components/apicalls/organisation"
-import { createAdmin } from "@/components/apicalls/admin-acount"
 import { uploadFile } from "@/components/apicalls/tenant-file"
-import { Loader2 } from "lucide-react"
+import { CheckCircle, Loader2, XCircle } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 // import { createOrganisation } from "./apicalls/organisation"
 
 interface AddDocumentModalProps {
@@ -25,6 +22,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
     const [loading, setLoading] = useState(true);
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false)
+    const { toast } = useToast()
 
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +36,17 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
         e.preventDefault()
 
         if (!file) {
-            console.error("No file selected");
+            toast({
+                variant: "destructive", title: (
+                    <div className="flex items-start gap-2">
+                        <XCircle className="h-11 w-9 text-white" />
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base">Error</span>
+                            <span className="text-sm font-light">No file selected</span>
+                        </div>
+                    </div>
+                ) as unknown as string, duration: 5000
+            });
             return;
         }
         setIsUploading(true)
@@ -55,15 +63,46 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
             const response = await uploadFile(token, formData, tenant_id)
 
             if (response.success) {
+                toast({
+                    variant: "success", title: (
+                        <div className="flex items-start gap-2">
+                            <CheckCircle className="h-11 w-9 text-white" />
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-base">Deleted</span>
+                                <span className="text-sm font-light">File Upload Successfully.</span>
+                            </div>
+                        </div>
+                    ) as unknown as string, duration: 5000
+                });
                 onClose()
             } else {
                 // Handle error
                 console.error("Upload failed:", response.message)
-                alert("Upload failed. Please try again.")
+                toast({
+                    variant: "destructive", title: (
+                        <div className="flex items-start gap-2">
+                            <XCircle className="h-11 w-9 text-white" />
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-base">Error</span>
+                                <span className="text-sm font-light">Upload failed. Please try again.</span>
+                            </div>
+                        </div>
+                    ) as unknown as string, duration: 5000
+                });
             }
         } catch (error) {
             console.error("Upload error:", error)
-            alert("An error occurred during upload. Please try again.")
+            toast({
+                variant: "destructive", title: (
+                    <div className="flex items-start gap-2">
+                        <XCircle className="h-11 w-9 text-white" />
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base">Error</span>
+                            <span className="text-sm font-light">An error occurred during upload. Please try again.</span>
+                        </div>
+                    </div>
+                ) as unknown as string, duration: 5000
+            });
         } finally {
             setIsUploading(false)
         }

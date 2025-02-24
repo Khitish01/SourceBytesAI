@@ -4,6 +4,7 @@ import { CiTrash } from "react-icons/ci";
 import { History } from "lucide-react";
 import { deleteAllHistory, deleteHistoryById, getHistory } from './apicalls/chat';
 import { ConfirmationModal } from './confirmation-modal';
+import Loader from './Loader';
 interface ChatHistoryProps {
     historyData: any
     onHistorySelect: (selectedChat: any) => void
@@ -108,6 +109,11 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
                 Clear History
             </button>
             <ConfirmationModal isOpen={isModelOpen} onClose={() => setIsModalOpen(false)} onDelete={handleDelete} />
+            {loading && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <Loader size="lg" className="text-white" />
+                </div>
+            )}
         </aside>
     )
 }

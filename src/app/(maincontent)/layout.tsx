@@ -37,7 +37,7 @@ export default function ContentLayout({
                     {children}
                 </div>
             </div>
-            <Toaster /> {/* Ensure Toaster is included */}
+            <Toaster />
         </div>
 
         // </body>
