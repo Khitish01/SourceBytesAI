@@ -73,7 +73,7 @@ export const Sidebar = () => {
                     <a
                         key={item.label}
                         onClick={() => { router.push(item.href) }}
-                        className={`flex ${pathname == item.href ? 'bg-white/25 font-extrabold' : ''} cursor-pointer  items-center text-xl gap-3 ${isExpanded ? 'p-3' : 'py-3 justify-center'} rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out`}
+                        className={`flex ${pathname == item.href ? 'bg-white/25 font-extrabold' : ''} cursor-pointer  items-center text-lg gap-3 ${isExpanded ? 'p-3' : 'py-3 justify-center'} rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out`}
                     >
                         <item.icon className={`w-5 h-5 ${pathname == item.href ? 'text-[#EF6A37]' : ''}`} />
                         <span className={cn('whitespace-nowrap transition-all duration-300 ease-in-out',
@@ -97,8 +97,8 @@ export const Sidebar = () => {
                         height={30}
                         className="w-[30px] h-[30px] mb-4"
                     />
-                    <h3 className="text-sm font-semibold mb-2">SourceBytes.AI</h3>
-                    <p className="text-xs leading-tight opacity-90">Transforming Enterprises with Generative AI</p>
+                    <h3 className="text-lg font-semibold mb-2">SourceBytes.AI</h3>
+                    <p className="text-md leading-tight opacity-90">Transforming Enterprises with Generative AI</p>
                 </Card>
             </div>
 

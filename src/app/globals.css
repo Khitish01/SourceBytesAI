@@ -29,3 +29,11 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+.chat-container::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-container {
+  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}

@@ -85,7 +85,7 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
                 {listings && listings.map((item) => (
                     <div
                         key={item.id}
-                        className="p-3 rounded-lg hover:bg-zinc-50 cursor-pointer transition-colors border border-zinc-200"
+                        className={`p-3 rounded-lg ${selectedId === item.id ? 'shadow-lg bg-zinc-50' : ''}  hover:bg-zinc-50 cursor-pointer transition-colors border border-zinc-200`}
                     >
                         <div className="flex items-start gap-3">
                             <Checkbox className="w-4 h-4 text-zinc-500 mt-1"
