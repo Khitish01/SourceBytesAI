@@ -7,6 +7,7 @@ import { login } from "./login";
 import Loader from "@/components/Loader";
 import { ArrowLeft, ArrowRight, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function LandingPage() {
     const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ export default function LandingPage() {
     const [showPassword, setShowPassword] = useState(false); // New state for password visibility
     const router = useRouter();
     const { toast } = useToast()
+    const { translations } = useLanguage();
 
     const handleSubmit = async () => {
         if (!showOtp) {
@@ -40,7 +42,7 @@ export default function LandingPage() {
                 const response = await login({ email, password });
 
                 if (response.success) {
-                    localStorage.setItem("authDetails", JSON.stringify(response));
+                    sessionStorage.setItem("authDetails", JSON.stringify(response));
                     router.push("/dashboard");
                 } else {
                     toast({
@@ -103,9 +105,14 @@ export default function LandingPage() {
                     </div>
 
                     <div className="text-white mb-6 lg:mb-0 h-[calc(100vh-170px)] flex justify-center flex-col">
-                        <h1 className="font-gilroy font-semibold text-lg sm:text-[22px] leading-[1.4] sm:leading-[35px] text-left decoration-from-font decoration-skip-ink-none mb-4 sm:mb-8">
-                            Trusted by Early Adopters to Transform Enterprise Intelligence – Join the Growing Revolution with{" "}
+                        {/* <h1 className="font-gilroy font-semibold text-lg sm:text-[22px] leading-[1.4] sm:leading-[35px] text-left decoration-from-font decoration-skip-ink-none mb-4 sm:mb-8">
+                         Trusted by Early Adopters to Transform Enterprise Intelligence – Join the Growing Revolution with{" "}
                             <span className="text-[#EF6A37]">SourceBytes.AI</span>
+                        </h1> */}
+                        <h1 className="font-gilroy font-semibold text-lg sm:text-[22px] leading-[1.4] sm:leading-[35px] text-left decoration-from-font decoration-skip-ink-none mb-4 sm:mb-8">
+                            {translations?.login?.banner_text_1_part1}{" "}
+                            <span className="text-[#EF6A37]">{translations?.app_name}</span>
+                            {translations?.login?.banner_text_1_part2}
                         </h1>
 
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-xs sm:text-sm">
@@ -117,7 +124,7 @@ export default function LandingPage() {
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                                12+ Data source formats
+                                {translations?.login?.banner_text_2}
                             </div>
                             <div className="flex items-center font-gilroy font-semibold text-[13px] sm:text-[15px] leading-[15px] text-left">
                                 <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -127,7 +134,7 @@ export default function LandingPage() {
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                                25+ GenAI features
+                                {translations?.login?.banner_text_3}
                             </div>
                         </div>
                     </div>
@@ -148,10 +155,10 @@ export default function LandingPage() {
                                         />
                                     </div>
                                     <p className="text-slate-500 font-gilroy text-sm">
-                                        Welcome to <span className="text-slate-500 font-semibold">SourceBytes.AI</span>
+                                        {translations?.login?.login_text_1_part_1} <span className="text-slate-500 font-semibold">{translations?.app_name}</span> {translations?.login?.login_text_1_part_2}
                                     </p>
                                     <h2 className="font-gilroy text-slate-950 font-medium text-xl sm:text-[30px] leading-tight sm:leading-[37.14px] mt-2">
-                                        {showOtp ? "Enter your password" : "Enter your credentials to continue"}
+                                        {showOtp ? translations?.login?.login_text_7 : translations?.login?.login_text_2}
                                     </h2>
                                 </div>
 
@@ -161,7 +168,7 @@ export default function LandingPage() {
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="Enter your email"
+                                            placeholder={translations?.login?.login_text_3}
                                             className="w-full text-gray-500 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EF6A37] focus:border-transparent text-sm"
                                         />
                                     ) : (
@@ -170,7 +177,7 @@ export default function LandingPage() {
                                                 type={showPassword ? "text" : "password"}
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="Enter your password"
+                                                placeholder={translations?.login?.login_text_7}
                                                 className="w-full text-gray-500 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EF6A37] focus:border-transparent text-sm"
                                             />
                                             <button
@@ -198,7 +205,7 @@ export default function LandingPage() {
                                                 className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors text-sm hover:bg-gray-300 flex items-center justify-center gap-2"
                                             >
                                                 <ArrowLeft size={18} />
-                                                Back
+                                                {translations?.login?.login_back_btn}
                                             </button>
                                         )}
                                         <button
@@ -206,7 +213,7 @@ export default function LandingPage() {
                                             className={`w-full px-4 py-3 bg-[#EF6A37] text-white rounded-lg font-medium transition-colors text-sm ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#EF6A37]/85"} flex items-center justify-center gap-2`}
                                             disabled={isLoading}
                                         >
-                                            {showOtp ? "Login" : "Continue"}
+                                            {showOtp ? translations?.login?.login_login_btn : translations?.login?.login_text_4}
                                             <ArrowRight size={18} />
                                         </button>
                                     </div>
@@ -215,13 +222,13 @@ export default function LandingPage() {
 
                             <div className="h-48 flex flex-col justify-end flex-1">
                                 <p className="mt-4 text-xs text-gray-500">
-                                    By continuing you agree to our{" "}
+                                    {translations?.login?.terms_text}{" "}
                                     <a href="#" className="text-[#EF6A37] hover:underline">
-                                        privacy policy
+                                        {translations?.login?.privacy_policy}
                                     </a>{" "}
                                     and{" "}
                                     <a href="#" className="text-[#EF6A37] hover:underline">
-                                        terms of use
+                                        {translations?.login?.terms_of_use}
                                     </a>
                                 </p>
                             </div>

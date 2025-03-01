@@ -56,7 +56,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
 
 
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
             const token = authDetails?.data?.token
             const tenant_id = authDetails?.data?.tenant_id
 
@@ -68,7 +68,7 @@ export function AddDocumentModal({ isOpen, onClose }: AddDocumentModalProps) {
                         <div className="flex items-start gap-2">
                             <CheckCircle className="h-11 w-9 text-white" />
                             <div className="flex flex-col">
-                                <span className="font-semibold text-base">Deleted</span>
+                                <span className="font-semibold text-base">Uploaded</span>
                                 <span className="text-sm font-light">File Upload Successfully.</span>
                             </div>
                         </div>

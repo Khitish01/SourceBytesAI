@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getOrganisationList } from "@/components/apicalls/organisation"
 import { createAdmin } from "@/components/apicalls/admin-acount"
 import { Loader2 } from "lucide-react"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface AddAdminModalProps {
     isOpen: boolean
@@ -36,12 +37,13 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
     const [listings, setListings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [isLoading, setIsLoading] = useState(false) // Added loading state for form submission
+    const { translations } = useLanguage();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true) // Set loading state to true when submission starts
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
             const token = authDetails?.data?.token
             const { cpassword, ...formDataWithoutCpassword } = formData
             const response = await createAdmin(token, formDataWithoutCpassword)
@@ -60,7 +62,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
     const loadOrganisations = async () => {
         setLoading(true)
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
             const token = authDetails?.data?.token
 
             if (!token) {
@@ -90,18 +92,18 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add Admin</DialogTitle>
+                    <DialogTitle>{translations?.super_admin?.add_admin}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid w-full gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="tenant_id">Select Organization *</Label>
+                            <Label htmlFor="tenant_id">{translations?.super_admin?.select_organization} *</Label>
                             <Select
                                 value={formData.tenant_id}
                                 onValueChange={(value) => setFormData((prev) => ({ ...prev, tenant_id: value }))}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select Organisation" />
+                                    <SelectValue placeholder={translations?.super_admin?.select_organization} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {listings && listings.map((org: any) => (
@@ -111,7 +113,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                             </Select>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Admin Name*</Label>
+                            <Label htmlFor="name">{translations?.super_admin?.admin_name}*</Label>
                             <Input
                                 id="name"
                                 name="name"
@@ -121,7 +123,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email*</Label>
+                            <Label htmlFor="email">{translations?.super_admin?.admin_email}*</Label>
                             <Input
                                 id="email"
                                 autoComplete=""
@@ -133,7 +135,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Create Password</Label>
+                            <Label htmlFor="password">{translations?.super_admin?.create_password}</Label>
                             <Input
                                 type="password"
                                 autoComplete="off"
@@ -144,7 +146,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="cpassword">Confirm Password</Label>
+                            <Label htmlFor="cpassword">{translations?.super_admin?.confirm_password}</Label>
                             <Input
                                 type="password"
                                 autoComplete="off"
@@ -163,10 +165,10 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                         {isLoading ? (
                             <>
                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                Adding Admin...
+                                {translations?.super_admin?.adding_admin}
                             </>
                         ) : (
-                            "Add Admin"
+                            translations?.super_admin?.add_admin
                         )}
                     </Button>
                 </form>

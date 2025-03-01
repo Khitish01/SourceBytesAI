@@ -8,9 +8,14 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  eslint:{
+  eslint: {
     ignoreDuringBuilds: true,
-  }
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "300mb", // Adjust if needed
+    },
+  },
 };
 
 export default nextConfig;

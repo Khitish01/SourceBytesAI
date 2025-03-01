@@ -15,6 +15,7 @@ import { deleteFile, getFileList } from '@/components/apicalls/tenant-file'
 import { AddDocumentModal } from './add-document-modal'
 import { useToast } from "@/hooks/use-toast"
 import Loader from '@/components/Loader'
+import { useLanguage } from '@/context/LanguageContext'
 
 
 
@@ -31,12 +32,12 @@ const DocumentPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedFile, setSelectedFile] = useState<Document | null>(null);
     const { toast } = useToast()
-
+    const { translations } = useLanguage();
 
     const loadListings = async () => {
         setLoading(true);
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
             const tenant_id = authDetails?.data?.tenant_id;
             if (!token) {
@@ -84,7 +85,7 @@ const DocumentPage = () => {
             });
             return;
         }
-        const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+        const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
         const token = authDetails?.data?.token;
         const tenant_id = authDetails?.data?.tenant_id;
 
@@ -133,7 +134,7 @@ const DocumentPage = () => {
                 <div className="flex justify-end mb-3">
                     <Button className="bg-orange-500 hover:bg-orange-600 flex items-center" onClick={() => setIsModalOpen(true)}>
                         <RiFileUploadLine className="h-4 w-4" />
-                        Upload
+                        {translations?.admin?.upload}
                     </Button>
                     <AddDocumentModal
                         isOpen={isModalOpen}
@@ -153,7 +154,7 @@ const DocumentPage = () => {
                             <div className="relative flex-1 w-full">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                 <Input
-                                    placeholder="Type to search"
+                                    placeholder={translations?.admin?.type_search}
                                     className="pl-10 w-full"
                                 />
                             </div>
@@ -170,7 +171,7 @@ const DocumentPage = () => {
                                         <TableHead className="w-12">
                                             <input type="checkbox" className="rounded border-gray-300" />
                                         </TableHead>
-                                        <TableHead className="min-w-[300px]">Name</TableHead>
+                                        <TableHead className="min-w-[300px]">{translations?.admin?.name}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -196,8 +197,8 @@ const DocumentPage = () => {
                             </Table>
 
                             <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-500">Show</span>
+                                <div className="flex items-center gap-2 w-96">
+                                    <span className="text-sm text-gray-500">{translations?.admin?.show}</span>
                                     <select
                                         value={entries}
                                         onChange={(e) => setEntries(Number(e.target.value))}
@@ -207,7 +208,7 @@ const DocumentPage = () => {
                                         <option value={25}>25</option>
                                         <option value={50}>50</option>
                                     </select>
-                                    <span className="text-sm text-gray-500">entries</span>
+                                    <span className="text-sm text-gray-500">{translations?.admin?.entries}</span>
                                 </div>
 
                                 <Pagination>

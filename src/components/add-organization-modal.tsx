@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createOrganisation } from "./apicalls/organisation"
 import { Loader2 } from "lucide-react"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface AddOrganizationModalProps {
     isOpen: boolean
@@ -38,12 +39,13 @@ const initialFormData: OrganizationFormData = {
 export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalProps) {
     const [formData, setFormData] = useState<OrganizationFormData>(initialFormData)
     const [isLoading, setIsLoading] = useState(false) // Added loading state
+    const { translations } = useLanguage();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true) // Set loading to true when submission starts
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}")
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
             const token = authDetails?.data?.token
             const response = await createOrganisation(token, formData)
             onClose()
@@ -63,20 +65,20 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add Organization</DialogTitle>
+                    <DialogTitle>{translations?.super_admin?.add_organization}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid w-full gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Organization Name*</Label>
+                            <Label htmlFor="name">{translations?.super_admin?.organization_name}*</Label>
                             <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="contact_email">Email*</Label>
+                            <Label htmlFor="contact_email">{translations?.super_admin?.email}*</Label>
                             <Input id="contact_email" name="contact_email" type="email" value={formData.contact_email} onChange={handleChange} required />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="account_manager_name">Account Manager Name*</Label>
+                            <Label htmlFor="account_manager_name">{translations?.super_admin?.account_manager_name}*</Label>
                             <Input
                                 id="account_manager_name"
                                 name="account_manager_name"
@@ -86,7 +88,7 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="account_manager_email">Account Manager Email*</Label>
+                            <Label htmlFor="account_manager_email">{translations?.super_admin?.account_manager_email}*</Label>
                             <Input
                                 id="account_manager_email"
                                 name="account_manager_email"
@@ -97,27 +99,27 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="subscriptionType">Subscription Type</Label>
+                            <Label htmlFor="subscriptionType">{translations?.super_admin?.subscription_type}</Label>
                             <Select
                                 value={formData.subscription_type}
                                 onValueChange={(value) => setFormData((prev) => ({ ...prev, subscription_type: value }))}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select subscription type" />
+                                    <SelectValue placeholder={translations?.super_admin?.selected_sub_type} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Free Trial">Free Trial</SelectItem>
-                                    <SelectItem value="Professional">Professional</SelectItem>
+                                    <SelectItem value="Free Trial">{translations?.super_admin?.free_trial}</SelectItem>
+                                    <SelectItem value="Professional">{translations?.super_admin?.professional}</SelectItem>
                                     {/* <SelectItem value="enterprise">Enterprise</SelectItem> */}
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="address">Organization Address</Label>
+                            <Label htmlFor="address">{translations?.super_admin?.organization_address}</Label>
                             <Input id="address" name="address" value={formData.address} onChange={handleChange} />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="phone_number">Phone Number</Label>
+                            <Label htmlFor="phone_number">{translations?.super_admin?.phone_number}</Label>
                             <Input
                                 id="phone_number"
                                 name="phone_number"
@@ -135,10 +137,10 @@ export function AddOrganizationModal({ isOpen, onClose }: AddOrganizationModalPr
                         {isLoading ? (
                             <>
                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                Adding Organization...
+                                {translations?.super_admin?.adding_organization}
                             </>
                         ) : (
-                            "Add Organization"
+                            translations?.super_admin?.add_organization
                         )}
                     </Button>
                 </form>

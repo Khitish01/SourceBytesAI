@@ -5,6 +5,7 @@ import { History } from "lucide-react";
 import { deleteAllHistory, deleteHistoryById, getHistory } from './apicalls/chat';
 import { ConfirmationModal } from './confirmation-modal';
 import Loader from './Loader';
+import { useLanguage } from '@/context/LanguageContext';
 interface ChatHistoryProps {
     historyData: any
     onHistorySelect: (selectedChat: any) => void
@@ -14,11 +15,12 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
     const [listings, setListings] = useState<any[]>([]);
     const [isModelOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedId, setSelectedId] = useState<string>('')
+    const { translations } = useLanguage();
 
     const loadListings = async () => {
         setLoading(true);
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
 
             if (!token) {
@@ -46,7 +48,7 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
 
     const handleDelete = async () => {
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
             const tenant_id = authDetails?.data?.tenant_id;
 
@@ -79,7 +81,7 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
         <aside className="w-80 border-l border-zinc-200 p-4 hidden lg:flex flex-col h-[calc(100vh-100px)]">
             <div className="flex items-center gap-2 mb-6">
                 <History className="w-5 h-5 text-zinc-700" />
-                <h2 className="text-lg font-semibold">History</h2>
+                <h2 className="text-lg font-semibold">{translations?.admin?.history}</h2>
             </div>
             <div className="space-y-4 flex-grow overflow-y-auto">
                 {listings && listings.map((item) => (
@@ -106,7 +108,7 @@ export const ChatHistory = ({ historyData, onHistorySelect }: ChatHistoryProps) 
                 onClick={() => setIsModalOpen(true)}
             >
                 <CiTrash className="w-4 h-4 text-zinc-500 mr-1" />
-                Clear History
+                {translations?.admin?.clear_history}
             </button>
             <ConfirmationModal isOpen={isModelOpen} onClose={() => setIsModalOpen(false)} onDelete={handleDelete} />
             {loading && (

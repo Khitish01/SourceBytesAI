@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Card } from './ui/card';
 import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { usePathname, useRouter } from "next/navigation"
+import { useLanguage } from '@/context/LanguageContext';
 // import { getUserRole } from '@/app/utils/auth';
 
 
@@ -16,26 +17,27 @@ export const Sidebar = () => {
     const [role, setRole] = useState<string | null>(null);
     const router = useRouter()
     const pathname = usePathname()
+    const { translations } = useLanguage();
 
     useEffect(() => {
         const fetchRole = async () => {
-            const userRole = JSON.parse(localStorage.getItem('authDetails') as string).data.user_type
+            const userRole = JSON.parse(sessionStorage.getItem('authDetails') as string).data.user_type
             setRole(userRole);
         };
 
         fetchRole();
     }, []);
     const handleLogout = () => {
-        localStorage.removeItem('authDetails');
+        sessionStorage.removeItem('authDetails');
         router.push('/')
     }
 
     const menuItems = [
-        { icon: Layout, label: 'Dashboard', href: '/dashboard' },
+        { icon: Layout, label: translations?.sidebar?.dashboard, href: '/dashboard' },
         ...(role === 'superuser'
-            ? [{ icon: FileText, label: 'Add Admin Accounts', href: '/accounts' }]
-            : [{ icon: FileText, label: 'Documents', href: '/documents' }]),
-        { icon: Settings, label: 'Settings', href: '/settings' },
+            ? [{ icon: FileText, label: translations?.sidebar?.add_admin_accounts, href: '/accounts' }]
+            : [{ icon: FileText, label: translations?.sidebar?.documents, href: '/documents' }]),
+        { icon: Settings, label: translations?.sidebar?.settings, href: '/settings' },
     ];
 
     return (
@@ -57,7 +59,7 @@ export const Sidebar = () => {
                     <span className={cn('font-semibold text-xl whitespace-nowrap transition-all duration-300 ease-in-out',
                         isExpanded ? 'block' : 'hidden'
                     )}>
-                        SourceBytes.AI
+                        {translations?.app_name}
                     </span>
                 </div>
                 <button
@@ -71,7 +73,7 @@ export const Sidebar = () => {
             <nav className="flex-1 p-4 space-y-2">
                 {menuItems.map((item) => (
                     <a
-                        key={item.label}
+                        key={item.href}
                         onClick={() => { router.push(item.href) }}
                         className={`flex ${pathname == item.href ? 'bg-white/25 font-extrabold' : ''} cursor-pointer  items-center text-lg gap-3 ${isExpanded ? 'p-3' : 'py-3 justify-center'} rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out`}
                     >
@@ -97,8 +99,8 @@ export const Sidebar = () => {
                         height={30}
                         className="w-[30px] h-[30px] mb-4"
                     />
-                    <h3 className="text-lg font-semibold mb-2">SourceBytes.AI</h3>
-                    <p className="text-md leading-tight opacity-90">Transforming Enterprises with Generative AI</p>
+                    <h3 className="text-lg font-semibold mb-2">{translations?.app_name}</h3>
+                    <p className="text-md leading-tight opacity-90">{translations?.sidebar?.box_text_1}</p>
                 </Card>
             </div>
 
@@ -111,7 +113,7 @@ export const Sidebar = () => {
                     <span className={cn('whitespace-nowrap transition-all duration-300 ease-in-out',
                         isExpanded ? 'opacity-100' : 'opacity-0 w-0'
                     )}>
-                        Logout
+                        {translations?.sidebar?.logout}
                     </span>
                 </button>
             </div>

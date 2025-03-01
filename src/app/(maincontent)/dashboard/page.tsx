@@ -15,7 +15,7 @@ const Dashboard = () => {
         const fetchRole = async () => {
             try {
                 setIsLoading(true); // Ensure loading starts
-                const authDetails = localStorage.getItem("authDetails");
+                const authDetails = sessionStorage.getItem("authDetails");
 
                 if (!authDetails) {
                     router.push("/"); // Redirect to login if no auth details

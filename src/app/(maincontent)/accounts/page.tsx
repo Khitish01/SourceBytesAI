@@ -37,6 +37,7 @@ import { useRouter } from "next/navigation";
 import { getAdminList } from "@/components/apicalls/admin-acount";
 import { AddAdminModal } from "./add-admin-modal";
 import Loader from "@/components/Loader"; // Import the Loader component
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Organization {
     id: string;
@@ -54,11 +55,12 @@ const Accounts = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [listings, setListings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true); // Add loading state
+    const { translations } = useLanguage();
 
     const loadListings = async () => {
         setLoading(true); // Start loading
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
 
             if (!token) {
@@ -84,7 +86,7 @@ const Accounts = () => {
             <div className="container mx-auto py-6 space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-semibold">All Admins</h1>
+                        <h1 className="text-2xl font-semibold">{translations?.super_admin?.all_admins}</h1>
                     </div>
                     <div>
                         <Button
@@ -92,7 +94,7 @@ const Accounts = () => {
                             onClick={() => setIsModalOpen(true)}
                         >
                             <RiFileUploadLine className="h-4 w-4" />
-                            Add Admin
+                            {translations?.super_admin?.add_admin}
                         </Button>
                         <AddAdminModal
                             isOpen={isModalOpen}
@@ -108,7 +110,7 @@ const Accounts = () => {
                     <div className="relative w-full sm:w-[250px]">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <Input
-                            placeholder="Type to search"
+                            placeholder={translations?.admin?.type_search}
                             className="pl-10"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -129,9 +131,9 @@ const Accounts = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-200">
-                                    <TableHead>Admin Name</TableHead>
-                                    <TableHead>Admin Email</TableHead>
-                                    <TableHead>Organization</TableHead>
+                                    <TableHead>{translations?.super_admin?.admin_name}</TableHead>
+                                    <TableHead>{translations?.super_admin?.admin_email}</TableHead>
+                                    <TableHead>{translations?.super_admin?.organization}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -150,7 +152,7 @@ const Accounts = () => {
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm">Show</span>
+                        <span className="text-sm">{translations?.admin?.show}</span>
                         <Select value={entriesPerPage} onValueChange={setEntriesPerPage}>
                             <SelectTrigger className="w-[70px]">
                                 <SelectValue>{entriesPerPage}</SelectValue>
@@ -161,7 +163,7 @@ const Accounts = () => {
                                 <SelectItem value="50">50</SelectItem>
                             </SelectContent>
                         </Select>
-                        <span className="text-sm">entries</span>
+                        <span className="text-sm">{translations?.admin?.entries}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Pagination>

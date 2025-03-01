@@ -22,6 +22,7 @@ import { AddOrganizationModal } from "./add-organization-modal";
 import { getOrganisationList } from "./apicalls/organisation";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader"; // Assuming this is the correct import path
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Organization {
     id: string;
@@ -40,11 +41,12 @@ export default function SuperAdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [listings, setListings] = useState<any[]>([]);
     const router = useRouter();
+    const { translations } = useLanguage();
 
     const loadListings = async () => {
         setLoading(true);
         try {
-            const authDetails = JSON.parse(localStorage.getItem("authDetails") || "{}");
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
 
             if (!token) {
@@ -74,7 +76,7 @@ export default function SuperAdminDashboard() {
             <div className="container mx-auto py-6 space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-semibold">All Organizations</h1>
+                        <h1 className="text-2xl font-semibold">{translations?.super_admin?.all_organizations}</h1>
                     </div>
                     <div>
                         <Button
@@ -82,7 +84,7 @@ export default function SuperAdminDashboard() {
                             onClick={() => setIsModalOpen(true)}
                         >
                             <RiFileUploadLine className="h-4 w-4" />
-                            Add Organization
+                            {translations?.super_admin?.add_organization}
                         </Button>
                         <AddOrganizationModal
                             isOpen={isModalOpen}
@@ -99,7 +101,7 @@ export default function SuperAdminDashboard() {
                     <div className="relative w-full sm:w-[250px]">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <Input
-                            placeholder="Type to search"
+                            placeholder={translations?.admin?.type_search}
                             className="pl-10"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,11 +122,11 @@ export default function SuperAdminDashboard() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-200">
-                                    <TableHead className="font-bold text-lg text-black">Organization Name</TableHead>
-                                    <TableHead className="font-bold text-lg text-black">Email</TableHead>
-                                    <TableHead className="font-bold text-lg text-black">Subscription Type</TableHead>
-                                    <TableHead className="font-bold text-lg text-black">Account Manager</TableHead>
-                                    <TableHead className="font-bold text-lg text-black">Status</TableHead>
+                                    <TableHead className="font-bold text-lg text-black">{translations?.super_admin?.organization_name}</TableHead>
+                                    <TableHead className="font-bold text-lg text-black">{translations?.super_admin?.email}</TableHead>
+                                    <TableHead className="font-bold text-lg text-black">{translations?.super_admin?.subscription_type}</TableHead>
+                                    <TableHead className="font-bold text-lg text-black">{translations?.super_admin?.account_manager}</TableHead>
+                                    <TableHead className="font-bold text-lg text-black">{translations?.super_admin?.status}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -158,7 +160,7 @@ export default function SuperAdminDashboard() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm">Show</span>
+                        <span className="text-sm">{translations?.admin?.show}</span>
                         <Select value={entriesPerPage} onValueChange={setEntriesPerPage}>
                             <SelectTrigger className="w-[70px]">
                                 <SelectValue>{entriesPerPage}</SelectValue>
@@ -169,7 +171,7 @@ export default function SuperAdminDashboard() {
                                 <SelectItem value="50">50</SelectItem>
                             </SelectContent>
                         </Select>
-                        <span className="text-sm">entries</span>
+                        <span className="text-sm">{translations?.admin?.entries}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Pagination>
