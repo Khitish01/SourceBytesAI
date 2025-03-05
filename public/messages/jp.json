@@ -22,13 +22,22 @@
     "sidebar": {
         "dashboard": "ダッシュボード",
         "documents": "書類",
+        "data_source": "データソース",
         "add_admin_accounts": "管理者アカウントの追加",
         "settings": "設定",
         "logout": "ログアウト",
+        "cancel": "キャンセル",
+        "logout_message_h2":"ログアウトしたいですか?",
+        "logout_message_p":"ログアウトしてもよろしいですか?",
         "box_text_1": "生成 AI で企業を変革する"
     },
     "header": {
-        "text_1": "Gen-AI で企業のイノベーションを推進"
+        "text_1": "Gen-AI で企業のイノベーションを推進",
+        "text_2": "コネクタの追加",
+        "text_3":"ウェブ",
+        "text_4":"インポートファイル",
+        "text_5":"Googleドライブ",
+        "text_6":"ソースまたはプロジェクト ファイルをインポートする"
     },
     "admin": {
         "chat_text_1": "何をお手伝いできますか?",
@@ -99,5 +108,16 @@
         "inactive": "非アクティブ",
         "all_admins": "すべての管理者",
         "adding_admin":"管理者を追加しています..."
+    },
+    "data_source":{
+        "title1":"ナレッジマネジメント",
+        "title2":"ソースコードのドキュメント",
+        "sub_title1":"知識をインポートする",
+        "sub_title2":"アプリからの自動同期を設定する",
+        "sub_title3":"ソースまたはプロジェクト ファイルをインポートする",
+        "text1":"ウェブ",
+        "text2":"ファイル",
+        "text3":"Googleドライブ",
+        "text4":"コードファイル"
     }
 }

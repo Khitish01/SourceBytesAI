@@ -21,13 +21,23 @@
     "sidebar": {
         "dashboard": "Dashboard",
         "documents": "Documents",
+        "data_source": "Data-source",
         "add_admin_accounts": "Add Admin Account",
         "settings": "Settings",
         "logout": "Logout",
+        "cancel": "Cancel",
+        "logout_message_h2":"Want to Logout?",
+        "logout_message_p":"Are you sure you want to logout?",
         "box_text_1": "Transforming Enterprises with Generative AI"
     },
     "header": {
-        "text_1": "Powering Enterprise Innovation with Gen-AI"
+        "text_1": "Powering Enterprise Innovation with Gen-AI",
+        "text_2": "Add Connector",
+        "text_3":"Web",
+        "text_4":"Import File",
+        "text_5":"Google Drive",
+        "text_6":"Import Source or Project File"
+
     },
     "admin": {
         "chat_text_1": "What can I help with?",
@@ -98,5 +108,17 @@
         "inactive": "Inactive",
         "all_admins": "All Admins",
         "adding_admin":"Adding Admin..."
+    },
+    "data_source":{
+        "title1":"Knowledge Management",
+        "title2":"Source Code Documentation",
+        "sub_title1":"Import Knowledge",
+        "sub_title2":"Setup Auto-Syncing from Apps",
+        "sub_title3":"Import Source or Project File",
+        "text1":"Web",
+        "text2":"File",
+        "text3":"Google Drive",
+        "text4":"Code File"
     }
+
 }

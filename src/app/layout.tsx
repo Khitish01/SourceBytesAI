@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SourceBytes.AI",
-  description: "SourceBytes.AI",
+  description: "Crafted with precision and care by Khitish & JC",
 };
 
 export default function RootLayout({
