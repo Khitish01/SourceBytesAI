@@ -437,7 +437,6 @@ const CodeFileImportPage = () => {
                         >
                             Browse Files
                         </Button>
-                        {/* <p className="text-xs text-gray-500 mt-2">Supported formats: {allowedFileTypes.join(", ")} (Max: 10MB)</p> */}
                     </div>
                 </div>
 
