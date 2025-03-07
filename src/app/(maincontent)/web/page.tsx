@@ -3,8 +3,9 @@
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Download, Trash2, RefreshCw, Search } from "lucide-react"
+import { Trash2, RefreshCw, Search } from "lucide-react"
 import ReusableTable from "@/components/ReusableTable"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface FileData {
     id: string
@@ -29,6 +30,7 @@ const webimportpage = () => {
     // Modal state for delete confirmation
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [fileToDelete, setFileToDelete] = useState<FileData | null>(null)
+    const { translations } = useLanguage();
 
     // Simulated async API call for sync
     const syncFile = async (fileId: string) => {
@@ -68,10 +70,10 @@ const webimportpage = () => {
     }
 
     const fields = [
-        { key: "name", label: "Base URL", sortable: false },
+        { key: "name", label: translations?.web?.Base_URL, sortable: false },
         {
             key: "status",
-            label: "Status",
+            label: translations?.code_file?.Status,
             sortable: false,
             render: (value: FileData["status"]) => {
                 const statusStyles: Record<FileData["status"], string> = {
@@ -85,13 +87,13 @@ const webimportpage = () => {
         },
         {
             key: "lastModified",
-            label: "Last Sync",
+            label: translations?.web?.Last_Sync,
             sortable: false,
             render: (value: string) => value,
         },
         {
             key: "sync",
-            label: "Sync Now",
+            label: translations?.web?.Sync_Now,
             sortable: false,
             render: (_: any, row: FileData) => {
                 const status = syncStatuses.get(row.id) || { status: "idle" }
@@ -130,9 +132,9 @@ const webimportpage = () => {
 
     return (
         <div className="p-6 mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Specify which websites to index</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">{translations?.web?.Specify_which_websites_to_index}</h2>
             <div className="bg-gray-100 p-6 rounded-lg mb-6 max-w-xl shadow-md">
-                <h3 className="text-lg font-semibold mb-4 text-gray-700">URL to Index:</h3>
+                <h3 className="text-lg font-semibold mb-4 text-gray-700">{translations?.web?.URL_to_Index}</h3>
                 <div className="mb-4">
                     <input
                         type="text"
@@ -143,18 +145,18 @@ const webimportpage = () => {
                 <div className="flex items-center mb-4 gap-4">
                     <label className="flex items-center gap-2">
                         <input type="radio" name="indexType" value="entire" defaultChecked className="form-radio text-orange-500" />
-                        <span className="text-sm text-gray-700">Entire Website</span>
+                        <span className="text-sm text-gray-700">{translations?.web?.Entire_Website}</span>
                     </label>
                     <label className="flex items-center gap-2">
                         <input type="radio" name="indexType" value="single" className="form-radio text-orange-500" />
-                        <span className="text-sm text-gray-700">Single Page</span>
+                        <span className="text-sm text-gray-700">{translations?.web?.Single_Page}</span>
                     </label>
                 </div>
                 <Button
                     className="bg-orange-500 hover:bg-orange-600 text-white text-center py-2 rounded-md flex items-center justify-center gap-2"
                     onClick={() => console.log("Connect clicked")}
                 >
-                    Connect
+                    {translations?.web?.Connect}
                     {/* <img src="/document-upload.svg" alt="Connect icon" className="h-5 w-5" /> */}
                 </Button>
             </div>
@@ -162,12 +164,12 @@ const webimportpage = () => {
             {/* <h2 className="text-2xl font-bold mb-6 text-gray-800">Already Index websites:</h2> */}
             <div className="bg-white rounded-lg shadow-sm">
                 <div className="flex justify-between py-4 items-center px-6">
-                    <h2 className="text-lg font-semibold">Already Index websites:</h2>
+                    <h2 className="text-lg font-semibold">{translations?.web?.Already_Index_websites}</h2>
                     <div className="flex items-center space-x-3">
                         <div className="relative w-64">
                             <input
                                 type="text"
-                                placeholder="Type to search"
+                                placeholder={translations?.code_file?.Type_to_search}
                                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 value={""}
                                 onChange={(e) => console.log(e.target.value)}
@@ -196,17 +198,16 @@ const webimportpage = () => {
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                        <h3 className="text-lg font-semibold mb-4">Want to Delete Code File?</h3>
+                        <h3 className="text-lg font-semibold mb-4">{translations?.web?.Do_Want_to_Delete}</h3>
                         <p className="mb-6">
-                            Are you sure you want to delete? This action
-                            cannot be undone
+                            {translations?.web?.Are_you_sure_you_want_to_delete_This_action_cannot_be_undone}
                         </p>
                         <div className="flex justify-end space-x-4">
                             <Button variant="destructive" onClick={confirmDelete} className="bg-orange-500 hover:bg-orange-600">
-                                Continue
+                                {translations?.web?.Continue}
                             </Button>
                             <Button variant="outline" onClick={cancelDelete} className="text-gray-700">
-                                Cancel
+                                {translations?.web?.Cancel}
                             </Button>
                         </div>
                     </div>

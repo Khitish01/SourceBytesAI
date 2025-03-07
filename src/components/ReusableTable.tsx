@@ -4,9 +4,9 @@ import React from "react"
 import { useState, useMemo, useId } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ChevronLeft, ChevronRight, ArrowUpDown, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface FieldConfig {
     key: string
@@ -36,7 +36,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
     data,
     fields,
     icons = [],
-    pageSize = 10,
+    pageSize = 10, // Default to 10 items per page
     selectable = true,
     onSelectionChange,
 }) => {
@@ -46,6 +46,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
     const [filterText, setFilterText] = useState("")
     const [selectedRows, setSelectedRows] = useState<string[]>([])
     const [isClient, setIsClient] = useState(false)
+    const { translations } = useLanguage()
 
     React.useEffect(() => {
         setIsClient(true)
@@ -53,7 +54,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
 
     const filteredData = useMemo(() => {
         return data.filter((item) =>
-            fields.some((field) => String(item[field.key]).toLowerCase().includes(filterText.toLowerCase())),
+            fields.some((field) => String(item[field.key]).toLowerCase().includes(filterText.toLowerCase()))
         )
     }, [data, fields, filterText])
 
@@ -77,7 +78,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
         setSortConfig((prevConfig) =>
             prevConfig && prevConfig.key === key
                 ? { key, direction: prevConfig.direction === "asc" ? "desc" : "asc" }
-                : { key, direction: "asc" },
+                : { key, direction: "asc" }
         )
     }
 
@@ -128,7 +129,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
                                 </div>
                             </TableHead>
                         ))}
-                        {icons.length > 0 && <TableHead className="font-extrabold text-black text-center">Action</TableHead>}
+                        {icons.length > 0 && <TableHead className="font-extrabold text-black text-center">{translations?.code_file?.Action}</TableHead>}
                     </TableRow>
                 </TableHeader>
                 <TableBody className="m-2">
@@ -165,7 +166,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
                                                         >
                                                             {iconConfig.icon}
                                                         </Button>
-                                                    ),
+                                                    )
                                             )}
                                         </div>
                                     )}
@@ -177,17 +178,15 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
             </Table>
             <div className="p-4 flex items-center justify-between bg-white rounded-b-lg">
                 <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">Show</span>
+                    <span className="text-sm text-gray-500">{translations?.reusable_table?.Show}</span>
                     <select
                         className="border rounded p-1 text-sm text-orange-500"
                         value={pageSize}
-                        onChange={(e) => setCurrentPage(1)}
+                        onChange={(e) => setCurrentPage(1)} // Reset to page 1, but pageSize is fixed at 10
                     >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
+                        <option value={10}>10</option> {/* Only show 10 as an option since it's fixed */}
                     </select>
-                    <span className="text-sm text-gray-500">entries</span>
+                    <span className="text-sm text-gray-500">{translations?.reusable_table?.entries}</span>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -200,7 +199,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
                     >
                         <ChevronLeft className="h-5 w-5 text-gray-500" />
                     </Button>
-                    <span className="text-sm text-gray-500">Page {currentPage} of {totalPages}</span>
+                    <span className="text-sm text-gray-500">{translations?.reusable_table?.Page} {currentPage} {translations?.reusable_table?.of} {totalPages}</span>
                     <Button
                         variant="link"
                         size="icon"

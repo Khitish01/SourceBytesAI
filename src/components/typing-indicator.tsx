@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface TypingIndicatorProps {
   size?: number
@@ -13,16 +14,19 @@ interface TypingIndicatorProps {
   align?: "left" | "right"
 }
 
+// const { translations } = useLanguage();
 export default function TypingIndicator({
   size = 10,
   bubbleColor = "#f1f5f9", // Light gray bubble
   dotColor = "#64748b", // Slate gray dots
   speed = 1,
   text = "Chatbot is typing",
+  // text = translations?.Typing?.Chatbot_is_typing,
   showText = true,
   align = "left",
 }: TypingIndicatorProps) {
   const [dots, setDots] = useState("")
+
 
   // Animate the dots for the text
   useEffect(() => {
