@@ -185,7 +185,6 @@ export async function downloadCodeFile(
     });
 
     const text = await response.text();
-    // console.log("DownloadCodeFile Raw Response:", text);
 
     let data;
     try {
