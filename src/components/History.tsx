@@ -6,6 +6,7 @@ import { deleteAllHistory, deleteHistoryById, getHistory } from './apicalls/chat
 import { ConfirmationModal } from './confirmation-modal';
 import Loader from './Loader';
 import { useLanguage } from '@/context/LanguageContext';
+import dayjs from "dayjs";
 
 
 interface ChatHistoryProps {
@@ -84,23 +85,24 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
 
     return (
         <aside
-            className={`${isOpen ? "w-60 md:w-80" : "w-0"
-                } border-l border-zinc-200 bg-white p-0 md:relative absolute right-0 md:flex flex-col h-[calc(100vh-100px)] transition-all duration-300`}
+            className={`${isOpen ? "w-60 md:w-80 p-5" : "w-0 p-0"
+                } border-l border-zinc-200 bg-zinc-100  md:relative absolute right-0 md:flex flex-col md:h-[calc(100vh-100px)] min-h-[calc(100vh-100px)] transition-all duration-300`}
         >
             {/* Main Content (only when open) */}
             {isOpen && (
                 <>
-                    <div className="flex items-center gap-2 mb-6 ml-4 mt-1">
+                    <div className="flex items-center gap-2 mb-4">
                         <History className="w-5 h-5 text-zinc-700" />
                         <h2 className="text-lg font-semibold">{translations?.admin?.history}</h2>
                     </div>
-                    <div className="space-y-4 flex-grow ml-4 overflow-y-auto">
+                    <div className="space-y-4 flex flex-col overflow-y-auto">
                         {listings &&
                             listings.map((item) => (
                                 <div
                                     key={item.id}
+                                    onClick={() => handleCheckboxChange(item)}
                                     className={`p-2 rounded-lg ${selectedId === item.id ? "shadow-lg bg-zinc-50" : ""
-                                        } hover:bg-zinc-50 cursor-pointer transition-colors border border-zinc-200`}
+                                        } hover:bg-zinc-50 cursor-pointer transition-colors border bg-white border-zinc-200`}
                                 >
                                     <div className="flex items-start gap-3">
                                         <Checkbox
@@ -110,7 +112,7 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
                                         />
                                         <div>
                                             <h3 className="text-sm font-medium text-zinc-900">{item.name}</h3>
-                                            <p className="text-xs text-zinc-500 mt-1">{item.created_at}</p>
+                                            <p className="text-xs text-zinc-500 mt-1">{dayjs(item.created_at).format("DD-MMM-YYYY HH:mm:ss")}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -119,7 +121,7 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
 
                     {/* Clear History Button */}
                     <button
-                        className="p-3 mt-4 ml-4 w-full bg-zinc-100 text-zinc-800 shadow-2xl hover:bg-slate-200 text-sm rounded-lg transition-colors shrink-0 flex items-center justify-center"
+                        className="p-3 mt-4 w-full bg-zinc-100 text-zinc-800 shadow-2xl hover:bg-slate-200 text-sm rounded-lg transition-colors shrink-0 flex items-center justify-center"
                         onClick={() => setIsModalOpen(true)}
                     >
                         <CiTrash className="w-4 h-4 text-zinc-500 mr-1" />
