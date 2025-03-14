@@ -94,7 +94,7 @@ export default function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-black/40"></div>
 
-                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 md:p-6 lg:p-8 flex-1">
+                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 md:p-6 lg:p-8 ">
                     <div className="mb-6 lg:mb-0 md:h-24">
                         <Image
                             src="/Frame 32.svg"
