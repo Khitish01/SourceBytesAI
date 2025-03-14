@@ -371,7 +371,7 @@ export const ChatComponent = () => {
             <div className="flex-1 flex flex-col">
                 <div className="flex-1 flex relative">
                     <main className="flex-1 flex flex-col md:p-6 max-w-4xl mx-auto w-full relative h-[calc(100vh-100px)]">
-                        <div className={`flex-1 overflow-y-auto chat-container ${messages?.length > 0 ? "mb-20" : ""}`}>
+                        <div className={`flex-1 overflow-y-auto chat-container ${messages?.length > 0 ? "md:mb-20 mb-40" : ""}`}>
                             {messages?.length === 0 ? (
                                 <div className="h-[calc(100vh-12rem)] flex items-center justify-center">
                                     <div className="text-center space-y-6">
@@ -400,7 +400,7 @@ export const ChatComponent = () => {
                                                 <div
                                                     className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : "bg-zinc-100 ml-8"} group relative flex items-center gap-2`}
                                                 >
-                                                    <p className="text-sm flex-1">{message.message}</p>
+                                                    <p className="text-sm flex-1 " style={{wordBreak:"break-word"}}>{message.message}</p>
                                                     {message.attachedFiles?.length > 0 && (
                                                         <div className="mt-2">
                                                             <span>Attached files:</span>
