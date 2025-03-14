@@ -131,7 +131,7 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
             {/* Toggle Button (always visible, positioned on the left border) */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors shadow-md z-10"
+                className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors shadow-md"
             >
                 {isOpen ? (
                     <img src="/chatclose.svg" alt="Collapse" className="w-6 h-6" />

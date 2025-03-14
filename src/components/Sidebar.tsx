@@ -14,7 +14,7 @@ const PAGE_URL = process.env.WEB_URL || "https://www.sourcebytes.ai"
 
 export const Sidebar = () => {
 
-    const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+    const isMobile = useMediaQuery({ query: "(max-width: 1439px)" });
 
     const [isExpanded, setIsExpanded] = useState(!isMobile);
     const [role, setRole] = useState<string | null>(null);

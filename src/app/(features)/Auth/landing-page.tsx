@@ -94,8 +94,8 @@ export default function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-black/40"></div>
 
-                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 md:p-6 lg:p-8 md:flex-1">
-                    <div className="mb-6 lg:mb-0 md:h-24">
+                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 lg:p-6 lg:p-8 lg:flex-1">
+                    <div className="mb-6 lg:mb-0 lg:h-24">
                         <Image
                             src="/Frame 32.svg"
                             alt="SourceBytes.AI Logo"
@@ -105,7 +105,7 @@ export default function LandingPage() {
                         />
                     </div>
 
-                    <div className="text-white mb-6 lg:mb-0 md:h-[calc(100vh-170px)] flex justify-center flex-col">
+                    <div className="text-white mb-6 lg:mb-0 lg:h-[calc(100vh-170px)] flex justify-center flex-col">
                         {/* <h1 className="font-gilroy font-semibold text-lg sm:text-[22px] leading-[1.4] sm:leading-[35px] text-left decoration-from-font decoration-skip-ink-none mb-4 sm:mb-8">
                          Trusted by Early Adopters to Transform Enterprise Intelligence – Join the Growing Revolution with{" "}
                             <span className="text-[#EF6A37]">SourceBytes.AI</span>
@@ -144,7 +144,7 @@ export default function LandingPage() {
                 <div className="relative z-10 w-full lg:w-3/5 py-4 px-4 sm:p-4 flex-1">
                     <div className="w-full h-full bg-white rounded-2xl p-6 sm:p-8 md:p-10 lg:p-16 shadow-xl">
                         <div className="flex flex-col h-full">
-                            <div className="md:h-[calc(100vh-400px)] flex flex-col flex-auto justify-center">
+                            <div className="lg:h-[calc(100vh-400px)] flex flex-col flex-auto justify-center">
                                 <div className="mb-6 sm:mb-8 lg:mb-12">
                                     <div className="w-10 sm:w-12 h-10 sm:h-12 bg-sourcebytes/10 rounded-lg flex items-center justify-center mb-4 sm:mb-8">
                                         <Image

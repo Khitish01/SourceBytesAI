@@ -92,7 +92,7 @@ const detectLanguage = (text: string): { extension: string; mimeType: string } =
 };
 
 export const ChatComponent = () => {
-    const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+    const isMobile = useMediaQuery({ query: "(max-width: 1023px)" });
     const [messages, setMessages] = useState<any[]>([]);
     const [inputText, setInputText] = useState("");
     const [attachedFiles, setAttachedFiles] = useState<{ blob: Blob; filename: string }[]>([]);
