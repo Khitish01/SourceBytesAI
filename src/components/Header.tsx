@@ -68,7 +68,7 @@ export const Header = () => {
     const { title, icon } = getHeaderContent();
 
     return (
-        <header className="p-4 pl-0 flex items-center justify-between border-b border-zinc-200">
+        <header className="p-4 md:pl-0 flex items-center justify-between border-b border-zinc-200">
             <div className="flex items-center gap-3">
                 {icon && (
                     <Image

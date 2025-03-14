@@ -19,7 +19,7 @@ export default function DataSourcePage() {
     };
 
     return (
-        <div className="p-5 font-sans">
+        <div className="md:p-5 py-5 font-sans">
             <div className="mb-8">
                 <button
                     className="flex items-center mb-3 text-gray-800 text-xl font-semibold focus:outline-none"
@@ -33,7 +33,7 @@ export default function DataSourcePage() {
                 </button>
 
                 {isKnowledgeOpen && (
-                    <div className="flex gap-8 p-6 w-fit">
+                    <div className="flex gap-8 md:p-6 w-fit flex-wrap">
                         {/* Import Knowledge Section */}
                         <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col items-center">
                             <h2 className="text-xl font-semibold mb-6">{translations?.data_source?.sub_title1}</h2>
