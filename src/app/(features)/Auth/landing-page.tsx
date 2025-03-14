@@ -84,7 +84,7 @@ export default function LandingPage() {
 
     return (
         <>
-            <div className="relative min-h-screen flex flex-col lg:flex-row">
+            <div className="relative min-h-screen flex flex-col lg:flex-row ">
                 <Image
                     src="/image 2.svg"
                     alt="Professional workspace"
@@ -94,7 +94,7 @@ export default function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-black/40"></div>
 
-                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 md:p-6 lg:p-8 ">
+                <div className="relative z-10 w-full lg:w-2/5 flex flex-col p-4 md:p-6 lg:p-8 md:flex-1">
                     <div className="mb-6 lg:mb-0 md:h-24">
                         <Image
                             src="/Frame 32.svg"
@@ -144,7 +144,7 @@ export default function LandingPage() {
                 <div className="relative z-10 w-full lg:w-3/5 py-4 px-4 sm:p-4 flex-1">
                     <div className="w-full h-full bg-white rounded-2xl p-6 sm:p-8 md:p-10 lg:p-16 shadow-xl">
                         <div className="flex flex-col h-full">
-                            <div className="md:h-[calc(100vh-400px)] flex flex-col justify-end flex-auto md:mb-28">
+                            <div className="md:h-[calc(100vh-400px)] flex flex-col flex-auto justify-center">
                                 <div className="mb-6 sm:mb-8 lg:mb-12">
                                     <div className="w-10 sm:w-12 h-10 sm:h-12 bg-sourcebytes/10 rounded-lg flex items-center justify-center mb-4 sm:mb-8">
                                         <Image
@@ -221,7 +221,7 @@ export default function LandingPage() {
                                 </div>
                             </div>
 
-                            <div className="h-48 flex flex-col justify-end flex-1">
+                            <div className="">
                                 <p className="mt-4 text-xs text-gray-500">
                                     {translations?.login?.terms_text}{" "}
                                     <a href="#" className="text-[#EF6A37] hover:underline">
