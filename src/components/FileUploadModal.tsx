@@ -1,15 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, DragEvent, ChangeEvent } from "react";
 import { Input } from "./ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { uploadFile } from "./apicalls/tenant-file";
+import { Button } from "./ui/button";
 
 interface FileUploadModalProps {
     isOpen: boolean;
+    department_id: string | undefined;
     onClose: () => void;
 }
 
-const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) => {
+const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, department_id, onClose }) => {
     const [fileType, setFileType] = useState<"file" | "web" | "googleDrive">("file");
     const [urltype, setUrlType] = useState<"full" | "single">("full");
     const [files, setFiles] = useState<File[]>([]);
+    const [isUploading, setIsUploading] = useState(false)
+    const { toast } = useToast()
 
     if (!isOpen) return null;
 
@@ -39,6 +47,90 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
         }
     };
 
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        debugger
+
+        if (files.length == 0) {
+            toast({
+                variant: "destructive", title: (
+                    <div className="flex items-start gap-2">
+                        <XCircle className="h-11 w-9 text-white" />
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base">Error</span>
+                            <span className="text-sm font-light">No file selected</span>
+                        </div>
+                    </div>
+                ) as unknown as string, duration: 5000
+            });
+            return;
+        }
+        setIsUploading(true)
+        const formData = new FormData();
+        department_id ? formData.append('department_id', department_id) : '';
+        files.forEach((file) => {
+            formData.append('file', file); // Append each file separately
+        });
+
+
+
+        try {
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
+            const token = authDetails?.data?.token
+            const tenant_id = authDetails?.data?.tenant_id
+
+            const response = await uploadFile(token, formData, tenant_id)
+
+            if (response.success) {
+                toast({
+                    variant: "success", title: (
+                        <div className="flex items-start gap-2">
+                            <CheckCircle className="h-11 w-9 text-white" />
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-base">Uploaded</span>
+                                <span className="text-sm font-light">File Upload Successfully.</span>
+                            </div>
+                        </div>
+                    ) as unknown as string, duration: 5000
+                });
+                onClose()
+            } else {
+                // Handle error
+                console.error("Upload failed:", response.message)
+                toast({
+                    variant: "destructive", title: (
+                        <div className="flex items-start gap-2">
+                            <XCircle className="h-11 w-9 text-white" />
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-base">Error</span>
+                                <span className="text-sm font-light">Upload failed. Please try again.</span>
+                            </div>
+                        </div>
+                    ) as unknown as string, duration: 5000
+                });
+            }
+        } catch (error) {
+            console.error("Upload error:", error)
+            toast({
+                variant: "destructive", title: (
+                    <div className="flex items-start gap-2">
+                        <XCircle className="h-11 w-9 text-white" />
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base">Error</span>
+                            <span className="text-sm font-light">An error occurred during upload. Please try again.</span>
+                        </div>
+                    </div>
+                ) as unknown as string, duration: 5000
+            });
+        } finally {
+            setFiles([]);
+            setIsUploading(false)
+        }
+
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]">
             <div className="bg-white rounded-lg p-6 w-[30%]">
@@ -51,7 +143,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
                 </div>
 
                 {/* File Type Selection */}
-                <div className="mb-4 bg-gray-200 p-5">
+                {/* <div className="mb-4 bg-gray-200 p-5">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Select file type:
                     </label>
@@ -102,7 +194,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
                             </label>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {fileType === "file" ? (
                     <div className="bg-gray-200 p-5 ">
@@ -127,6 +219,8 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
                                 onChange={handleFileSelect}
                                 className="hidden"
                                 id="fileInput"
+                                accept=".pdf"
+                                disabled={isUploading}
                             />
                             {files.length > 0 && (
                                 <div className="mt-2">
@@ -138,7 +232,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
                         </div>
 
                         {/* Upload Button */}
-                        <button
+                        {/* <button
                             onClick={handleUpload}
                             className="mt-9 w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 flex items-center justify-center"
                         >
@@ -157,7 +251,23 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({ isOpen, onClose }) =>
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                                 />
                             </svg>
-                        </button>
+                        </button> */}
+
+
+
+
+                        <Button className="mt-9 w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 flex items-center justify-center"
+                            disabled={isUploading || files.length == 0} onClick={handleSubmit}
+                        >
+                            {isUploading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Uploading...
+                                </>
+                            ) : (
+                                "Upload"
+                            )}
+                        </Button>
                     </div>
                 ) : fileType === "web" ? (
                     <div className="bg-gray-200 p-5 ">

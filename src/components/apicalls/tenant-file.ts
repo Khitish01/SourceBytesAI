@@ -102,3 +102,85 @@ export async function deleteFile(
     };
   }
 }
+
+export async function syncFile(
+  token: string,
+  tenant_id: string,
+  formData: { file_id: string, department_id?: string },
+): Promise<any> {
+  const url = `${BASE_URL}/tenants/${tenant_id}/sync-file/`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || "File syncing failed",
+        data: null,
+      };
+    }
+
+    return {
+      success: true,
+      message: data.message || "File successfully synced",
+      data: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    };
+  }
+}
+
+export async function unSyncFile(
+  token: string,
+  tenant_id: string,
+  formData: { file_ids: string[] },
+): Promise<any> {
+  const url = `${BASE_URL}/tenants/${tenant_id}/unsync-file/`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || "File syncing failed",
+        data: null,
+      };
+    }
+
+    return {
+      success: true,
+      message: data.message || "File successfully synced",
+      data: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    };
+  }
+}

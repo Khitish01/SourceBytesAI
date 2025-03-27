@@ -1,141 +1,28 @@
-// "use client";
-
-// import { useState } from "react";
-// import { ChevronDown } from "lucide-react";
-// import { useRouter } from "next/navigation";
-// import { useLanguage } from "@/context/LanguageContext";
-
-// export default function DataSourcePage() {
-//     const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(true);
-//     const [isSourceCodeOpen, setIsSourceCodeOpen] = useState(true);
-//     const router = useRouter();
-//     const { translations } = useLanguage();
-
-//     // State to track which item is currently clicked/actively pressed
-//     const [activeItem, setActiveItem] = useState(null);
-
-//     const handleNavigation = (path: string) => {
-//         router.push(path); // Navigate to the specified path
-//     };
-
-//     return (
-//         <div className="md:p-5 py-5 font-sans">
-//             <div className="mb-8">
-//                 <button
-//                     className="flex items-center mb-3 text-gray-800 text-xl font-semibold focus:outline-none"
-//                     onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-//                 >
-//                     {/* Knowledge Management */}
-//                     {translations?.data_source?.title1}
-//                     <ChevronDown
-//                         className={`w-5 h-5 ml-2 transition-transform duration-200 ${isKnowledgeOpen ? "rotate-180" : ""}`}
-//                     />
-//                 </button>
-
-//                 {isKnowledgeOpen && (
-//                     <div className="flex gap-8 md:p-6 w-fit flex-wrap">
-//                         {/* Import Knowledge Section */}
-//                         <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col items-center">
-//                             <h2 className="text-xl font-semibold mb-6">{translations?.data_source?.sub_title1}</h2>
-//                             <div className="flex gap-5">
-//                                 {[
-//                                     { label: translations?.data_source?.text1, icon: "Group.svg", path: "/web" },
-//                                     { label: translations?.data_source?.text2, icon: "Vector.svg", path: "/ImportFile" },
-//                                 ].map((item, index) => (
-//                                     <div
-//                                         key={index}
-//                                         className={`bg-white rounded-lg p-6 text-center w-[120px] h-[120px] shadow-sm flex flex-col justify-center items-center cursor-pointer transition-colors ${activeItem === item.label ? "bg-blue-100 border border-blue-300" : "hover:bg-blue-50"
-//                                             }`}
-//                                         onClick={() => handleNavigation(item.path)}
-//                                     >
-//                                         <img
-//                                             src={`/${item.icon}`}
-//                                             alt={item.label}
-//                                             className="w-[40px] mb-2"
-//                                         />
-//                                         <p className="text-sm font-medium">{item.label}</p>
-//                                     </div>
-//                                 ))}
-//                             </div>
-//                         </div>
-
-//                         {/* Setup Auto-Syncing Section */}
-//                         <div className="flex-1 bg-gray-100 rounded-xl p-6 w-fit flex flex-col items-center">
-//                             <h2 className="text-xl font-semibold mb-6 whitespace-nowrap">
-//                                 {/* Setup Auto-Syncing from Apps */}
-//                                 {translations?.data_source?.title2}
-//                             </h2>
-//                             <div
-//                                 className={`bg-white rounded-lg p-6 text-center w-[120px] h-[120px] shadow-sm flex flex-col justify-center items-center cursor-pointer transition-colors ${activeItem === "Google Drive" ? "bg-blue-100 border border-blue-300" : "hover:bg-blue-50"
-//                                     }`}
-//                                 onClick={() => handleNavigation("/ImportGdrive")}
-//                                 onMouseLeave={() => setActiveItem(null)}
-//                             >
-//                                 <img src="/Group1.svg" alt="Google Drive" className="w-[40px] mb-2" />
-//                                 <p className="text-sm font-medium">{translations?.data_source?.text3}</p>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 )}
-//             </div>
-
-//             <div>
-//                 <button
-//                     className="flex items-center mb-3 text-gray-800 text-xl font-semibold focus:outline-none"
-//                     onClick={() => setIsSourceCodeOpen(!isSourceCodeOpen)}
-//                 >
-//                     {translations?.data_source?.title2}
-//                     <ChevronDown
-//                         className={`w-5 h-5 ml-2 transition-transform duration-200 ${isSourceCodeOpen ? "rotate-180" : ""}`}
-//                     />
-//                 </button>
-
-//                 {isSourceCodeOpen && (
-//                     <div className="flex p-6 w-fit">
-//                         <div className="bg-gray-100 rounded-xl p-6 w-fit flex flex-col items-center">
-//                             <h2 className="text-lg font-semibold mb-4">{translations?.data_source?.sub_title3}</h2>
-//                             <div className="flex items-center gap-4">
-//                                 <div
-//                                     className={`bg-white rounded-lg p-6 text-center w-[120px] h-[120px] shadow-sm flex flex-col justify-center items-center cursor-pointer transition-colors ${activeItem === "Code File" ? "bg-blue-100 border border-blue-300" : "hover:bg-blue-50"
-//                                         }`}
-//                                     onClick={() => handleNavigation("/ImportCodeFile")}
-//                                     onMouseLeave={() => setActiveItem(null)}
-//                                 >
-//                                     <div className="w-10 h-10 mb-2 flex items-center justify-center">
-//                                         <img src="/Group2.svg" alt="Code File" className="w-8 h-8" />
-//                                     </div>
-//                                     <p className="text-sm font-medium">{translations?.data_source?.text4}</p>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
-
-
-
-
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 "use client"
 
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { Folder, File, MoreHorizontal, Plus, ChevronDown, ChevronRight, Bell, Layout, User, MoreVertical, EllipsisVertical } from "lucide-react"
+import { Folder, File, MoreHorizontal, Plus, ChevronDown, ChevronRight, Bell, Layout, User, MoreVertical, EllipsisVertical, XCircle, CheckCircle } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import FileUploadModal from "@/components/FileUploadModal"
-import { getDepartmentList } from "@/components/apicalls/department"
+import { createDepartment, deleteDepartment, deleteFile, getDepartmentList, renameDepartment } from "@/components/apicalls/department"
 import { getOrganisationDetails } from "@/components/apicalls/organisation"
 import Loader from "@/components/Loader"
-import { getFileList } from "@/components/apicalls/tenant-file"
+import { getFileList, syncFile, unSyncFile, uploadFile } from "@/components/apicalls/tenant-file"
 import dayjs from "dayjs"
+import { getCodeFiles } from "@/components/apicalls/importcodefiles"
+import { useToast } from "@/hooks/use-toast"
 
 // Types for our data structure
 type ItemType = "organization" | "department" | "sub-department" | "folder" | "source" | "file"
@@ -166,88 +53,11 @@ export default function DataSourceExplorer() {
     // Initial data structure
     const [items, setItems] = useState<Item[]>([])
     const [documents, setDocuments] = useState<any>({})
-
-    // {
-    //     id: "nttdata",
-    //     name: "NTTDATA",
-    //     type: "organization",
-    //     expanded: true,
-    //     children: [
-    //         {
-    //             id: "hr",
-    //             name: "HR",
-    //             type: "department",
-    //             expanded: false,
-    //             children: [
-    //                 {
-    //                     id: "payroll-policy",
-    //                     name: "Payroll Policy",
-    //                     type: "folder",
-    //                 },
-    //                 {
-    //                     id: "leave-policy",
-    //                     name: "Leave Policy",
-    //                     type: "folder",
-    //                 },
-    //             ],
-    //         },
-    //         {
-    //             id: "finance",
-    //             name: "Finance",
-    //             type: "department",
-    //         },
-    //     ],
-    // }
-
-
-    // Sample files for the file explorer view
-    const [files, setFiles] = useState<FileItem[]>([
-        {
-            id: "1",
-            name: "IndoSakura.pdf",
-            status: "Uploading...",
-            lastSync: "03:00:54 | 11-03-2024",
-            size: "34 KB",
-            syncNow: "-",
-        },
-        {
-            id: "2",
-            name: "https://apps...",
-            status: "Ready to Sync",
-            lastSync: "03:00:54 | 11-03-2024",
-            size: "34 KB",
-            syncNow: "↻",
-        },
-        {
-            id: "3",
-            name: "IndoSakura.pdf",
-            status: "Processing!",
-            lastSync: "03:00:54 | 11-03-2024",
-            size: "34 KB",
-            syncNow: "↻",
-        },
-        {
-            id: "4",
-            name: "https://apps...",
-            status: "Not Accepted",
-            lastSync: "03:00:54 | 11-03-2024",
-            size: "34 KB",
-            syncNow: "-",
-        },
-        {
-            id: "5",
-            name: "IndoSakura.pdf",
-            status: "Ready",
-            lastSync: "03:00:54 | 11-03-2024",
-            size: "34 KB",
-            syncNow: "↻",
-        },
-    ])
-
     // State for dialogs
     const [isCreateDepartmentOpen, setIsCreateDepartmentOpen] = useState(false)
     const [isCreateSubDepartmentOpen, setIsCreateSubDepartmentOpen] = useState(false)
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false)
+    const [isRename, setIsRename] = useState(false)
     const [isCreateSourceOpen, setIsCreateSourceOpen] = useState(false)
     const [newItemName, setNewItemName] = useState("Untitled folder")
     const [currentParentId, setCurrentParentId] = useState<string | null>(null)
@@ -270,6 +80,7 @@ export default function DataSourceExplorer() {
     const [selectedFiles, setSelectedFiles] = useState<string[]>([])
     const [fileContextMenuOpen, setFileContextMenuOpen] = useState(false)
     const [fileContextMenuPosition, setFileContextMenuPosition] = useState({ x: 0, y: 0 })
+    const { toast } = useToast()
 
     // Toggle item expansion
     const toggleExpand = (id: string) => {
@@ -299,9 +110,12 @@ export default function DataSourceExplorer() {
     }
 
     // Create new item
-    const createNewItem = (type: ItemType) => {
+    const createNewItem = (type: ItemType, isRename: boolean = false) => {
         if (!activeItem) return
-
+        if (isRename) {
+            setIsRename(true);
+            setNewItemName(activeItem?.name)
+        }
         setIsDropdownOpen(false)
         if (type === "department") {
             setIsCreateDepartmentOpen(true)
@@ -315,39 +129,62 @@ export default function DataSourceExplorer() {
     }
 
     // Add new item to the data structure
-    const addNewItem = (type: ItemType) => {
-        if (!currentParentId) return
+    const addNewItem = async (type: ItemType) => {
 
-        const newId = `${type}-${Date.now()}`
-        const newItem: Item = {
-            id: newId,
-            name: newItemName,
-            type: type,
+
+        setLoading(true);
+        const authDetailsString = sessionStorage.getItem("authDetails");
+        if (!authDetailsString) {
+            setError("No authentication details found in session storage");
+            setLoading(false);
+            return;
         }
 
-        setItems((prevItems) => {
-            const updateItems = (items: Item[]): Item[] => {
-                return items.map((item) => {
-                    if (item.id === currentParentId) {
-                        return {
-                            ...item,
-                            expanded: true,
-                            children: [...(item.children || []), newItem],
-                        }
-                    }
-                    if (item.children) {
-                        return { ...item, children: updateItems(item.children) }
-                    }
-                    return item
-                })
-            }
-            return updateItems(prevItems)
-        })
+        let authDetails;
+        try {
+            authDetails = JSON.parse(authDetailsString);
+        } catch (e) {
+            setError("Failed to parse auth details from session storage");
+            setLoading(false);
+            return;
+        }
 
+        const token = authDetails.data?.token;
+        const tenant_id = authDetails.data?.tenant_id;
+
+        if (!token || !tenant_id) {
+            setError("Token or tenant_id missing in auth details");
+            setLoading(false);
+            return;
+        }
+        let payload: { name: string, parent?: string, is_folder?: boolean } = {
+            name: newItemName
+        }
+        if (type == 'folder' && activeItem?.type == 'organization') {
+            payload['is_folder'] = true
+        }
+        else if (type == 'sub-department') {
+            payload['parent'] = activeItem?.id
+        }
+        else if (type == 'folder' && activeItem?.type != 'organization') {
+            payload['is_folder'] = true
+            payload['parent'] = activeItem?.id
+        }
+        console.log(payload);
+
+        const response = await createDepartment(token, payload, tenant_id);
+
+        console.log(response);
+        if (response.success) {
+            await fetchCodeFiles();
+        } else {
+            setError(response.error);
+        }
         // Reset state
         setNewItemName("Untitled folder")
         setCurrentParentId(null)
         closeAllDialogs()
+        setLoading(false);
     }
 
     // Close all dialogs
@@ -378,23 +215,28 @@ export default function DataSourceExplorer() {
 
     const transformData = (orgDetails: any, apiData: any[]): Item[] => {
 
+        const buildHierarchy = (department: any): Item => ({
+            id: department.id,
+            name: department.name,
+            type: department.is_folder ? 'folder' : department.parent == null ? 'department' : 'sub-department',
+            expanded: false,
+            path: department.path,
+            is_folder: department.is_folder,
+            children: department.sub_departments.map(buildHierarchy), // Recursively process sub-departments
+        });
+        // children: dept.sub_departments.map((subDept: any) => ({
+        //     ...subDept,
+        //     type: subDept.is_folder ? "folder" : "sub-department",
+        // })),
         return [
             {
                 id: orgDetails?.id,
                 name: orgDetails?.name,
-                type: "organization",
+                type: 'organization',
                 expanded: false,
                 children: apiData
                     .filter(dept => dept.parent === null)
-                    .map(dept => ({
-                        ...dept,
-                        type: dept?.is_folder ? 'folder' : 'department',
-                        expanded: false,
-                        children: dept.sub_departments.map((subDept: any) => ({
-                            ...subDept,
-                            type: subDept.is_folder ? "folder" : "sub-department",
-                        })),
-                    })),
+                    .map(buildHierarchy), // Build hierarchy for top-level departments
             },
         ];
     };
@@ -468,9 +310,9 @@ export default function DataSourceExplorer() {
             setLoading(false);
             return;
         }
-        const response = await getFileList(token, tenant_id, department_id, page,pageSize);
+        const response = await getFileList(token, tenant_id, department_id, page, pageSize);
         if (response.success) {
-            console.log(response.data.results);
+            console.log("getDocumentList", response.data.results);
 
             // const apiData = transformData(orgDetails.data, response.data.results);
             setDocuments(response?.data);
@@ -480,27 +322,348 @@ export default function DataSourceExplorer() {
         }
         setLoading(false);
     };
+    const BASE_URL = "https://dev.sourcebytes.ai"; // Adjust based on your environment
+
+    // Handle file download in development mode needs to be fixed
+    const handleDownload = async (fileUrl: string, fileName: string) => {
+        try {
+            const fullUrl = `${BASE_URL}${fileUrl}`;
+            console.log("Downloading from:", fullUrl); // Debug log
+            const response = await fetch(fullUrl);
+
+            if (!response.ok) {
+                throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
+
+    // Handle file view (open in browser)
+    const handleView = (fileUrl: string) => {
+        const fullUrl = `${BASE_URL}${fileUrl}`;
+        console.log("Viewing at:", fullUrl); // Debug log
+        window.open(fullUrl, "_blank"); // Open in a new tab
+    };
+
+    // Handle file deletion
+    const handleDelete = async (fileId: string) => {
+        setLoading(true);
+        const authDetailsString = sessionStorage.getItem("authDetails");
+        if (!authDetailsString) {
+            setError("No authentication details found in session storage");
+            setLoading(false);
+            return;
+        }
+
+        let authDetails;
+        try {
+            authDetails = JSON.parse(authDetailsString);
+        } catch (e) {
+            setError("Failed to parse auth details from session storage");
+            setLoading(false);
+            return;
+        }
+
+        const token = authDetails.data?.token;
+        const tenant_id = authDetails.data?.tenant_id;
+
+        if (!token || !tenant_id) {
+            setError("Token or tenant_id missing in auth details");
+            setLoading(false);
+            return;
+        }
+
+        const response = await deleteFile(token, tenant_id, fileId);
+        if (response.success) {
+            console.log(response.message); // "File successfully deleted"
+            // Refresh the file list after deletion
+            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+        } else {
+            console.error("Delete failed:", response.error);
+            setError(response.error || "Failed to delete file");
+        }
+        setLoading(false);
+    };
+    const handleSync = async (doc: any) => {
+        setLoading(true);
+        const authDetailsString = sessionStorage.getItem("authDetails");
+        if (!authDetailsString) {
+            setError("No authentication details found in session storage");
+            setLoading(false);
+            return;
+        }
+
+        let authDetails;
+        try {
+            authDetails = JSON.parse(authDetailsString);
+        } catch (e) {
+            setError("Failed to parse auth details from session storage");
+            setLoading(false);
+            return;
+        }
+
+        const token = authDetails.data?.token;
+        const tenant_id = authDetails.data?.tenant_id;
+
+        if (!token || !tenant_id) {
+            setError("Token or tenant_id missing in auth details");
+            setLoading(false);
+            return;
+        }
+        let response;
+
+        if (doc?.upload_status == 'Ready to Sync') {
+            let payload: { file_id: string, department_id?: string } = {
+                file_id: doc?.id,
+                department_id: doc?.department
+            }
+
+            response = await syncFile(token, tenant_id, payload);
+
+        } else {
+            let payload: { file_ids: string[] } = {
+                file_ids: [doc.id]
+            }
+            response = await unSyncFile(token, tenant_id, payload);
+        }
+
+
+
+
+
+
+        if (response.success) {
+            console.log(response.message); // "File successfully deleted"
+            // Refresh the file list after deletion
+            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+        } else {
+            console.error("Delete failed:", response.error);
+            setError(response.error || "Failed to delete file");
+        }
+        setLoading(false);
+    };
+    const handleDeleteDepartment = async () => {
+        setLoading(true);
+        const authDetailsString = sessionStorage.getItem("authDetails");
+        if (!authDetailsString) {
+            setError("No authentication details found in session storage");
+            setLoading(false);
+            return;
+        }
+
+        let authDetails;
+        try {
+            authDetails = JSON.parse(authDetailsString);
+        } catch (e) {
+            setError("Failed to parse auth details from session storage");
+            setLoading(false);
+            return;
+        }
+
+        const token = authDetails.data?.token;
+        const tenant_id = authDetails.data?.tenant_id;
+
+        if (!token || !tenant_id) {
+            setError("Token or tenant_id missing in auth details");
+            setLoading(false);
+            return;
+        }
+
+        const response = await deleteDepartment(token, tenant_id, activeItem?.id);
+        if (response.success) {
+            console.log(response.message); // "File successfully deleted"
+            // Refresh the file list after deletion
+            await fetchCodeFiles();
+            // await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+        } else {
+            console.error("Delete failed:", response.error);
+            setError(response.error || "Failed to delete file");
+        }
+        setLoading(false);
+    };
+    const handleRenameDepartment = async () => {
+        setLoading(true);
+        const authDetailsString = sessionStorage.getItem("authDetails");
+        if (!authDetailsString) {
+            setError("No authentication details found in session storage");
+            setLoading(false);
+            return;
+        }
+
+        let authDetails;
+        try {
+            authDetails = JSON.parse(authDetailsString);
+        } catch (e) {
+            setError("Failed to parse auth details from session storage");
+            setLoading(false);
+            return;
+        }
+
+        const token = authDetails.data?.token;
+        const tenant_id = authDetails.data?.tenant_id;
+
+        if (!token || !tenant_id) {
+            setError("Token or tenant_id missing in auth details");
+            setLoading(false);
+            return;
+        }
+        let payload: { name: string, parent?: string, is_folder?: boolean } = {
+            name: newItemName
+        }
+
+        const response = await renameDepartment(token, tenant_id, payload, activeItem?.id);
+
+
+        if (response.success) {
+            console.log(response.message); // "File successfully deleted"
+            // Refresh the file list after deletion
+            await fetchCodeFiles();
+            // await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+        } else {
+            console.error("Delete failed:", response.error);
+            setError(response.error || "Failed to delete file");
+        }
+        // Reset state
+        setNewItemName("Untitled folder")
+        setCurrentParentId(null)
+        closeAllDialogs()
+        setLoading(false);
+    };
+
+
+
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault()
+
+    //     if (!file) {
+    //         toast({
+    //             variant: "destructive", title: (
+    //                 <div className="flex items-start gap-2">
+    //                     <XCircle className="h-11 w-9 text-white" />
+    //                     <div className="flex flex-col">
+    //                         <span className="font-semibold text-base">Error</span>
+    //                         <span className="text-sm font-light">No file selected</span>
+    //                     </div>
+    //                 </div>
+    //             ) as unknown as string, duration: 5000
+    //         });
+    //         return;
+    //     }
+    //     setLoading(true)
+    //     const formData = new FormData();
+    //     formData.append('file', file);
+
+
+
+    //     try {
+    //         const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
+    //         const token = authDetails?.data?.token
+    //         const tenant_id = authDetails?.data?.tenant_id
+
+    //         const response = await uploadFile(token, formData, tenant_id)
+
+    //         if (response.success) {
+    //             toast({
+    //                 variant: "success", title: (
+    //                     <div className="flex items-start gap-2">
+    //                         <CheckCircle className="h-11 w-9 text-white" />
+    //                         <div className="flex flex-col">
+    //                             <span className="font-semibold text-base">Uploaded</span>
+    //                             <span className="text-sm font-light">File Upload Successfully.</span>
+    //                         </div>
+    //                     </div>
+    //                 ) as unknown as string, duration: 5000
+    //             });
+    //             onClose()
+    //         } else {
+    //             // Handle error
+    //             console.error("Upload failed:", response.message)
+    //             toast({
+    //                 variant: "destructive", title: (
+    //                     <div className="flex items-start gap-2">
+    //                         <XCircle className="h-11 w-9 text-white" />
+    //                         <div className="flex flex-col">
+    //                             <span className="font-semibold text-base">Error</span>
+    //                             <span className="text-sm font-light">Upload failed. Please try again.</span>
+    //                         </div>
+    //                     </div>
+    //                 ) as unknown as string, duration: 5000
+    //             });
+    //         }
+    //     } catch (error) {
+    //         console.error("Upload error:", error)
+    //         toast({
+    //             variant: "destructive", title: (
+    //                 <div className="flex items-start gap-2">
+    //                     <XCircle className="h-11 w-9 text-white" />
+    //                     <div className="flex flex-col">
+    //                         <span className="font-semibold text-base">Error</span>
+    //                         <span className="text-sm font-light">An error occurred during upload. Please try again.</span>
+    //                     </div>
+    //                 </div>
+    //             ) as unknown as string, duration: 5000
+    //         });
+    //     } finally {
+    //         setLoading(false)
+    //     }
+
+    // }
+
+
 
     useEffect(() => {
         fetchCodeFiles();
     }, []);
 
     // Render tree item
-    const isFolder = (name: string): boolean => {
-        // debugger
-        for (const department of items?.[0]?.children || []) {
+    // const isFolder = (name: string): boolean => {
+    //     // debugger
+    //     for (const department of items?.[0]?.children || []) {
+    //         if (department.name === name && department.is_folder) {
+    //             return true;
+    //         }
+    //         for (const subDept of department.children || []) {
+    //             if (subDept.name === name && subDept.is_folder) {
+    //                 return true;
+    //             }
+    //             for(const dd of subDept.children||[]){
+    //                 if (dd.name === name && dd.is_folder) {
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // };
+    const isFolder = (name: string, departments: any[]): boolean => {
+        for (const department of departments) {
             if (department.name === name && department.is_folder) {
                 return true;
             }
-            for (const subDept of department.children || []) {
-                if (subDept.name === name && subDept.is_folder) {
-                    return true;
-                }
+            if (department.children && isFolder(name, department.children)) {
+                return true;
             }
         }
         return false;
     };
 
+    /**
+     * Render a single tree item.
+     * @param {Item} item The tree item to render.
+     * @param {number} [level=0] The level of the item in the tree.
+     * @returns {JSX.Element} The rendered tree item.
+     */
     const renderTreeItem = (item: Item, level = 0) => {
         const isExpandable = item.children && item.children.length > 0
         // console.log(isExpandable);
@@ -517,13 +680,16 @@ export default function DataSourceExplorer() {
                         setIsSelected(true);
                         setCurrentPage(1);
                         getDocumentList(item.type !== "organization" ? item?.id : '', 1, pageSize);
+                        console.log(item);
+
                         let selectedPath: any = item?.path?.split('/')
                         console.log(selectedPath);
                         selectedPath?.[0] == '' ? selectedPath[0] = orgDetails?.data?.name : selectedPath = [orgDetails?.data?.name]
-                        selectedPath = selectedPath?.map((x: any, i: number) => ({ is_folder: isFolder(x), name: x }))
+                        selectedPath = selectedPath?.map((x: any, i: number) => ({ is_folder: isFolder(x, items?.[0]?.children || []), name: x }))
                         setPath(selectedPath);
 
                         console.log(item);
+                        console.log(selectedPath);
                         setSelectedItem(item)
                         // }
                         toggleExpand(item.id)
@@ -613,7 +779,12 @@ export default function DataSourceExplorer() {
 
                                 <FileUploadModal
                                     isOpen={isModalOpen}
-                                    onClose={() => setIsModalOpen(false)}
+                                    department_id={activeItem ? (activeItem?.type == 'organization' ? null : activeItem?.id) : (selectedItem?.type == 'organization' ? null : selectedItem?.id)}
+                                    onClose={() => {
+                                        setCurrentPage(1);
+                                        getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', 1, pageSize);
+                                        setIsModalOpen(false)
+                                    }}
                                 />
                             </div>
 
@@ -808,9 +979,7 @@ export default function DataSourceExplorer() {
                                             </tr>
                                         </thead>
                                         <tbody>
-
                                             {documents?.results && documents?.results.map((doc: any) => (
-                                                // <></>
                                                 <tr key={doc?.id} className="border-t hover:bg-gray-50">
                                                     <td className="p-3">
                                                         <input type="checkbox" className="rounded" />
@@ -829,7 +998,7 @@ export default function DataSourceExplorer() {
                                                     <td className="p-3">{doc?.last_sync ? dayjs(doc?.last_sync).format('hh:mm:ss | DD-MM-YYYY') : '-'}</td>
                                                     <td className="p-3">{doc?.file_size_kb}</td>
                                                     <td className="p-3">
-                                                        <button className="text-gray-500 hover:text-gray-700">
+                                                        <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 className="h-4 w-4"
@@ -845,11 +1014,14 @@ export default function DataSourceExplorer() {
                                                                 />
                                                             </svg>
                                                         </button>
-
                                                     </td>
                                                     <td className="p-3">
                                                         <div className="flex items-center gap-2 text-gray-500">
-                                                            <button className="hover:text-gray-700">
+                                                            <button
+                                                                className="hover:text-gray-700"
+                                                                onClick={() => handleDownload(doc.file, doc.original_filename)}
+                                                                title="Download"
+                                                            >
                                                                 <svg
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     className="h-4 w-4"
@@ -865,7 +1037,11 @@ export default function DataSourceExplorer() {
                                                                     />
                                                                 </svg>
                                                             </button>
-                                                            <button className="hover:text-gray-700">
+                                                            <button
+                                                                className="hover:text-gray-700"
+                                                                onClick={() => handleView(doc.file)}
+                                                                title="View"
+                                                            >
                                                                 <svg
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     className="h-4 w-4"
@@ -903,7 +1079,11 @@ export default function DataSourceExplorer() {
                                                                     />
                                                                 </svg>
                                                             </button>
-                                                            <button className="hover:text-gray-700">
+                                                            <button
+                                                                className="hover:text-gray-700"
+                                                                onClick={() => handleDelete(doc.id)}
+                                                                title="Delete"
+                                                            >
                                                                 <svg
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     className="h-4 w-4"
@@ -923,11 +1103,13 @@ export default function DataSourceExplorer() {
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {documents?.results?.length == 0 && (
-                                                // <></>
+                                            {documents?.results?.length === 0 && (
                                                 <tr>
-                                                    <td colSpan={6} className="text-center py-20">
-                                                        <span>No Data Found</span>
+                                                    <td colSpan={7} className="text-center py-10">
+                                                        {/* <span>No Data Found</span> */}
+                                                        <div className="w-full flex justify-center align-middle">
+                                                            <img src="/no-data-found.svg" className="w-56" alt="" />
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             )}
@@ -1087,7 +1269,9 @@ export default function DataSourceExplorer() {
                         <>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department")}>New Sub-Department</DropdownMenuItem>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
+                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
+                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("department", true)}>Rename</DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
                         </>
                     )}
 
@@ -1095,7 +1279,9 @@ export default function DataSourceExplorer() {
                         <>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department")}>New Sub-Department</DropdownMenuItem>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className=" rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
+                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
+                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department", true)}>Rename</DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
                         </>
                     )}
 
@@ -1103,8 +1289,8 @@ export default function DataSourceExplorer() {
                         <>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
                             <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" >Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" >Delete</DropdownMenuItem>
+                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder", true)}>Rename</DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
                         </>
                     )}
 
@@ -1115,7 +1301,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateDepartmentOpen} onOpenChange={setIsCreateDepartmentOpen} modal={true}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Create new Department</DialogTitle>
+                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Department</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1129,9 +1315,16 @@ export default function DataSourceExplorer() {
                         <Button variant="outline" onClick={closeAllDialogs}>
                             Cancel
                         </Button>
-                        <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("department")}>
-                            Create
-                        </Button>
+                        {isRename ? (
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => handleRenameDepartment()}>
+                                Update
+                            </Button>
+                        ) : (
+
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("department")}>
+                                Create
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1140,7 +1333,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateSubDepartmentOpen} onOpenChange={setIsCreateSubDepartmentOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Create new Sub-Department</DialogTitle>
+                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Sub-Department</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1154,9 +1347,16 @@ export default function DataSourceExplorer() {
                         <Button variant="outline" onClick={closeAllDialogs}>
                             Cancel
                         </Button>
-                        <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("sub-department")}>
-                            Create
-                        </Button>
+                        {isRename ? (
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => handleRenameDepartment()}>
+                                Update
+                            </Button>
+                        ) : (
+
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("sub-department")}>
+                                Create
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1165,7 +1365,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateFolderOpen} onOpenChange={setIsCreateFolderOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Create new Folder</DialogTitle>
+                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Folder</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1179,9 +1379,16 @@ export default function DataSourceExplorer() {
                         <Button variant="outline" onClick={closeAllDialogs}>
                             Cancel
                         </Button>
-                        <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("folder")}>
-                            Create
-                        </Button>
+                        {isRename ? (
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => handleRenameDepartment()}>
+                                Update
+                            </Button>
+                        ) : (
+
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("folder")}>
+                                Create
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1190,7 +1397,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateSourceOpen} onOpenChange={setIsCreateSourceOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Create new Source</DialogTitle>
+                        <DialogTitle> {isRename ? 'Update' : 'Create new'} Source</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1204,9 +1411,16 @@ export default function DataSourceExplorer() {
                         <Button variant="outline" onClick={closeAllDialogs}>
                             Cancel
                         </Button>
-                        <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("source")}>
-                            Create
-                        </Button>
+                        {isRename ? (
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => handleRenameDepartment()}>
+                                Update
+                            </Button>
+                        ) : (
+
+                            <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("source")}>
+                                Create
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
