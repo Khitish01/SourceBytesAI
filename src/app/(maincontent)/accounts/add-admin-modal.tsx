@@ -142,7 +142,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                                 <SelectContent>
                                     {loading ? (
                                         <SelectItem value="loading" disabled>Loading...</SelectItem>
-                                    ) : listings && listings.length > 0 ? (
+                                    ) : listings && listings?.length > 0 ? (
                                         listings.map((org: any) => (
                                             <SelectItem key={org?.id} value={org.tenant_id}>
                                                 {org.name}
@@ -153,7 +153,7 @@ export function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
                                     )}
                                 </SelectContent>
                             </Select>
-                            {!formData.tenant_id && !loading && listings.length > 0 && (
+                            {!formData.tenant_id && !loading && listings?.length > 0 && (
                                 <p className="text-red-500 text-sm">Please select an organization</p>
                             )}
                         </div>

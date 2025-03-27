@@ -10,6 +10,8 @@ interface AdminFormData {
 }
 export async function getAdminList(token: string): Promise<any> {
   const url = `${BASE_URL}/users/get-admins/`;
+  console.log(url);
+  
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -25,6 +27,7 @@ export async function getAdminList(token: string): Promise<any> {
       return {
         success: false,
         error: data.message || "Fetching Admin failed",
+        data:[]
       };
     }
 

@@ -27,13 +27,14 @@
         "settings": "設定",
         "logout": "ログアウト",
         "cancel": "キャンセル",
+        "users":"Users",
         "logout_message_h2":"ログアウトしたいですか?",
         "logout_message_p":"ログアウトしてもよろしいですか?",
         "box_text_1": "生成 AI で企業を変革する"
     },
     "header": {
         "text_1": "Gen-AI で企業のイノベーションを推進",
-        "text_2": "コネクタの追加",
+        "text_2": "種類以上のデータ",
         "text_3":"ウェブ",
         "text_4":"インポートファイル",
         "text_5":"Googleドライブ",

@@ -183,3 +183,37 @@ export async function editOrganisation(
     };
   }
 }
+
+
+export async function getOrganisationDetails(
+  token: string,
+  id: string
+): Promise<any> {
+  const url = `${BASE_URL}/tenants/organization/profile/details?tenant_id=${id}`;
+  
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || "Fetching organizations failed",
+      };
+    }
+
+    return data;
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Something went wrong",
+    };
+  }
+}

@@ -26,13 +26,14 @@
         "settings": "Settings",
         "logout": "Logout",
         "cancel": "Cancel",
+        "users":"Users",
         "logout_message_h2":"Want to Logout?",
         "logout_message_p":"Are you sure you want to logout?",
         "box_text_1": "Transforming Enterprises with Generative AI"
     },
     "header": {
         "text_1": "Powering Enterprise Innovation with Gen-AI",
-        "text_2": "Add Connector",
+        "text_2": "Data Source",
         "text_3":"Web",
         "text_4":"Import File",
         "text_5":"Google Drive",

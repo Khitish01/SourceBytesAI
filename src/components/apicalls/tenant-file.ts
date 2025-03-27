@@ -4,9 +4,12 @@ const BASE_URL = process.env.API_URL || "https://dev.sourcebytes.ai/api/v1"; // 
 
 export async function getFileList(
   token: string,
-  tenant_id: string
+  tenant_id: string,
+  department_id: string,
+  page: number,
+  pageSize: number
 ): Promise<any> {
-  const url = `${BASE_URL}/tenants/${tenant_id}/files/`;
+  const url = `${BASE_URL}/tenants/${tenant_id}/files/?page=${page}&page_size=${pageSize}${department_id == '' ? '' : '&department_id=' + department_id}`;
   try {
     const response = await fetch(url, {
       method: "GET",

@@ -21,9 +21,14 @@ export const Header = () => {
                     title: translations?.header?.text_1 || 'Powering Enterprise Innovation with Gen-AI',
                     icon: null
                 };
+            case '/users':
+                return {
+                    title: translations?.header?.text_7 || 'User Management',
+                    icon: '/manage_users.svg'
+                };
             case '/datasource':
                 return {
-                    title: translations?.header?.text_2 || 'Add Connector',
+                    title: translations?.header?.text_2 || 'Data Source',
                     icon: '/cloudchange.svg'
                 };
             case '/accounts':

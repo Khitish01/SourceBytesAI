@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Layout, FileText, Settings, LogOut, X } from "lucide-react";
+import { Layout, FileText, Settings, LogOut, X, UsersRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Card } from "./ui/card";
@@ -58,7 +58,10 @@ export const Sidebar = () => {
         { icon: Layout, label: translations?.sidebar?.dashboard, href: "/dashboard" },
         ...(role === "superuser"
             ? [{ icon: FileText, label: translations?.sidebar?.add_admin_accounts, href: "/accounts" }]
-            : [{ icon: FileText, label: translations?.sidebar?.data_source, href: "/datasource" }]),
+            : [
+                { icon: FileText, label: translations?.sidebar?.data_source, href: "/datasource" },
+                { icon: UsersRound, label: translations?.sidebar?.users, href: "/users" }
+            ]),
         { icon: Settings, label: translations?.sidebar?.settings, href: "/settings" },
     ];
 

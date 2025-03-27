@@ -32,7 +32,7 @@ export default function ContentLayout({
         <div className="min-h-screen text-zinc-900 flex bg-zinc-800">
             <Sidebar />
             <div className="flex-1 h-[calc(100vh-25px)] overflow-hidden bg-white flex flex-col m-3 ml-0 pl-6 rounded-lg">
-                <div className="overflow-y-scroll pr-8">
+                <div className="overflow-y-scroll">
                     <Header />
                     {children}
                 </div>

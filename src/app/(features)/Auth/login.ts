@@ -10,6 +10,7 @@ interface form {
 export async function login(formData: form): Promise<any> {
   const url = `${BASE_URL}/auth/login/`;
   console.log(url);
+  console.log(formData);
   
   try {
     const response = await fetch(url, {
