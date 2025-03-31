@@ -21,6 +21,7 @@ import { useMediaQuery } from "react-responsive";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github.css";
+import { useRouter } from "next/navigation";
 
 const dummyFiles = [
     { id: 1, name: "Paracetamol.zip" },
@@ -122,6 +123,7 @@ export const ChatComponent = () => {
     const [selectedFile, setSelectedFile] = useState<{ blob: Blob; filename: string } | null>(null);
     const [editedContent, setEditedContent] = useState("");
     const [isNewConversation, setIsNewConversation] = useState<boolean>(false); // Track if it's a new conversation
+    const router = useRouter()
 
     useEffect(() => {
         setIsHistoryOpen(!isMobile);
@@ -457,8 +459,8 @@ export const ChatComponent = () => {
         <div className="bg-white text-zinc-900 flex">
             <div className="flex-1 flex flex-col">
                 <div className="flex-1 flex relative">
-                    <main className="flex-1 flex flex-col md:p-6 max-w-4xl mx-auto w-full relative h-[calc(100vh-100px)]">
-                        <div className={`flex-1 overflow-y-auto chat-container ${messages?.length > 0 ? (attachedFiles.length > 0 ? "mb-52" : "md:mb-28 mb-40") : ""}`}>
+                    <main className="flex-1 flex flex-col md:p-6  mx-auto w-full relative h-[calc(100vh-100px)]">
+                        <div className={`flex-1  ${messages?.length > 0 ? (attachedFiles.length > 0 ? "mb-52" : "md:mb-28 mb-40") : ""}`}>
                             {messages?.length === 0 ? (
                                 <div className="h-[calc(100vh-12rem)] flex items-center justify-center">
                                     <div className="text-center space-y-6">
@@ -466,8 +468,9 @@ export const ChatComponent = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="p-6 rounded-xl w-full bg-gradient-to-r from-[#fef4e5] to-[#f9cda1]">
-                                    <div className="space-y-4 bg-white rounded-xl p-4">
+                                // <div className="p-6 rounded-xl w-full bg-gradient-to-r from-[#fef4e5] to-[#f9cda1] ">
+                                <>
+                                    <div className="space-y-4 bg-white rounded-xl p-4 h-[calc(100vh-350px)] chat-container overflow-y-auto">
                                         {messages?.map((message) => (
                                             <div
                                                 key={message.id}
@@ -485,7 +488,7 @@ export const ChatComponent = () => {
                                                     </div>
                                                 )}
                                                 <div
-                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : "bg-zinc-100 ml-8"} relative `}
+                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : " ml-8"} relative `}
                                                 >
                                                     <div className="text-sm flex-1 break-words whitespace-normal overflow-hidden" >
 
@@ -601,11 +604,18 @@ export const ChatComponent = () => {
                                         )}
                                         <div ref={chatEndRef} />
                                     </div>
-                                </div>
+
+                                    <div className="flex justify-center items-center cursor-pointer mt-7">
+                                        <div className="w-[25%] bg-[#F0F0F0] p-3 flex justify-center items-center gap-3 font-medium">
+                                            <img src="/refresh.svg" alt="" className="h-5 w-5"/>
+                                            <span>Regenerate Response</span> </div>
+                                    </div>
+                                </>
+                                // </div>
                             )}
                         </div>
                         <div
-                            className={`${messages?.length === 0 ? "absolute top-1/2 mt-9 left-6 right-6 transform -translate-y-1/2" : "absolute bottom-6 left-6 right-6"} flex flex-col gap-2 bg-white p-4 rounded-lg shadow-md`}
+                            className={`${messages?.length === 0 ? "absolute top-1/2 mt-9 left-6 right-6 transform -translate-y-1/2" : "absolute bottom-6 left-6 right-6"} flex flex-col gap-2 bg-white p-4 rounded-lg`}
                         >
                             {attachedFiles.length > 0 && (
                                 <div className="bg-gradient-to-r from-[#fef4e5] to-[#f9cda1] p-3 rounded-lg shadow-sm flex flex-wrap gap-2">
@@ -634,29 +644,30 @@ export const ChatComponent = () => {
 
                             <div className="relative flex items-center gap-2">
                                 <button
-                                    className="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 transition-colors shrink-0"
+                                    className="p-2 bg-[#EDEDED] hover:bg-zinc-200  transition-colors h-[50px]"
                                     onClick={() => setIsListening((prev) => !prev)}
                                 >
                                     {isListening ? (
                                         <PiRecordFill className="w-6 h-6 text-red-700" />
                                     ) : (
-                                        <CiMicrophoneOn className="w-6 h-6 text-zinc-700" />
+                                        <img src="/microphone-2.svg" alt=""  className="w-6 h-6"/>
                                     )}
                                 </button>
 
-                                <div className="flex-1 relative">
+                                <div className="w-full relative h-[50px]">
                                     <textarea
                                         readOnly={isGenerating}
                                         value={inputText}
                                         onChange={handleInputChange}
                                         onPaste={handlePaste}
                                         placeholder={translations?.admin?.chat_input_placeholder}
-                                        className="flex-1 p-3 rounded-lg border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none overflow-hidden w-full"
+                                        className="flex-1 p-3 rounded-lg h-[50px] border border-zinc-200 bg-[#EDEDED] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none overflow-auto w-full"
                                         rows={1}
                                         onInput={(e) => {
                                             const target = e.target as HTMLTextAreaElement;
                                             target.style.height = "auto";
                                             target.style.maxHeight = "300px";
+                                            target.style.minHeight = "50px";
                                             void target.offsetHeight;
                                             target.style.height = `${target.scrollHeight}px`;
                                         }}
@@ -670,7 +681,7 @@ export const ChatComponent = () => {
                                     />
                                     <button
                                         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 p-1 rounded"
-                                        title="Switch to code editor"
+                                        title="Switch to code editor" onClick={()=>router.push('/datasource')}
                                     >
                                         <img src="/Upload.svg" className="w-5 h-5" alt="Send" />
                                     </button>
@@ -690,9 +701,9 @@ export const ChatComponent = () => {
                                 </div>
                                 <button
                                     onClick={handleSendMessage}
-                                    className={`bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 transition-colors shrink-0 flex items-center justify-center w-10 h-10`}
+                                    className={`bg-orange-500 hover:bg-orange-600 text-white h-[50px] p-2 transition-colors shrink-0 flex items-center justify-center w-10 h-10`}
                                 >
-                                    <img src="/send-2.svg" className="w-6 h-6" alt="Send" />
+                                    <img src="/send-2-white.svg" className="w-6 h-6 " alt="Send" />
                                 </button>
                             </div>
                         </div>

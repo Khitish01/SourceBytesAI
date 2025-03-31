@@ -18,6 +18,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -29,11 +30,24 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+
 .chat-container::-webkit-scrollbar {
-  display: none;
+  /* display: none; */
+  /* width: 10px;
+  height: 10px; */
 }
 
-.chat-container {
-  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
-  scrollbar-width: none; /* Hide scrollbar in Firefox */
+/* .chat-container::-webkit-scrollbar-button {
+  background: #ccc
 }
+.chat-container::-webkit-scrollbar-track-piece {
+  background: #888
+}
+.chat-container::-webkit-scrollbar-thumb {
+  background: #eee
+} */
+
+/* .chat-container {
+  -ms-overflow-style: none;
+  scrollbar-width: 10px; 
+} */

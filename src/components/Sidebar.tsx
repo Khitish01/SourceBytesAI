@@ -69,7 +69,7 @@ export const Sidebar = () => {
         <>
             <aside
                 className={cn(
-                    "h-screen bg-zinc-800 text-white left-0 top-0 z-50 md:relative absolute flex flex-col transition-all duration-300 ease-in-out overflow-auto",
+                    "h-screen bg-zinc-800 text-white left-0 top-0 z-50 md:relative absolute flex flex-col transition-all duration-300 ease-in-out ",
                     isExpanded ? "w-80" : "md:w-20 w-0"
                 )}
             >
@@ -108,7 +108,7 @@ export const Sidebar = () => {
                             key={item.href}
                             onClick={() => {
                                 router.push(item.href);
-                                isMobile ? setIsExpanded(false) : setIsExpanded(true)
+                                // isMobile ? setIsExpanded(false) : setIsExpanded(true)
                             }}
                             className={`flex ${pathname == item.href ? "bg-white/25 font-extrabold" : ""
                                 } cursor-pointer items-center text-lg gap-3 ${isExpanded ? "p-3" : "py-3 justify-center"
@@ -126,7 +126,8 @@ export const Sidebar = () => {
                         </a>
                     ))}
                 </nav>
-                <div className="px-4 mb-4">
+                {isExpanded? (
+                    <div className="px-4 mb-4">
                     <Card
                         className={cn(
                             "relative overflow-hidden bg-gradient-to-b from-[#eb9471] to-[#d05524] text-white p-6 border-none",
@@ -146,6 +147,10 @@ export const Sidebar = () => {
                         <p className="text-md leading-tight opacity-90">{translations?.sidebar?.box_text_1}</p>
                     </Card>
                 </div>
+                ):(
+                    <></>
+                )}
+                
 
                 <div className="p-3 border-t border-white/10">
                     <button
