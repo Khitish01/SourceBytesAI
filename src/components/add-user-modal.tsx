@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 // import type { User } from "@/types/user"
 import { DepartmentSelector } from "@/components/department-selector"
 import { UserTypeSelect } from "./user-type-select"
+import { createDepartmentUser, CreateUserRequest, grantPermission } from "./apicalls/users"
 
 interface AddUserModalProps {
   isOpen: boolean
@@ -17,7 +18,7 @@ interface AddUserModalProps {
   onAddUser: (user: any) => void
 }
 
-type UserType = "Admin" | "Employee"
+type UserType = "admin" | "employee"
 type Step = 1 | 2
 
 export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) {
@@ -26,10 +27,13 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [userType, setUserType] = useState<string>("Admin")
+  const [userType, setUserType] = useState<string>("admin")
   const [allowFullAccess, setAllowFullAccess] = useState(false)
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([])
+  const [allDeptData, setAllDeptData] = useState<any[]>([])
   const [isDepartmentDropdownOpen, setIsDepartmentDropdownOpen] = useState<boolean>(false)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
     setStep(1)
@@ -37,7 +41,7 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
     setEmail("")
     setPassword("")
     setConfirmPassword("")
-    setUserType("Admin")
+    setUserType("admin")
     setAllowFullAccess(false)
     setSelectedDepartments([])
   }
@@ -46,14 +50,87 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
     resetForm()
     onClose()
   }
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Handle form submission
-    console.log({
-      userType,
-      allowFullAccess,
-      selectedDepartments,
-    })
-    onClose()
+    setLoading(true);
+    if (allDeptData.length === 0) {
+      alert("Please select at least one department")
+      return
+    }
+    const authDetailsString = sessionStorage.getItem("authDetails");
+    if (!authDetailsString) {
+      setError("No authentication details found in session storage");
+      setLoading(false);
+      return;
+    }
+
+    let authDetails;
+    try {
+      authDetails = JSON.parse(authDetailsString);
+    } catch (e) {
+      setError("Failed to parse auth details from session storage");
+      setLoading(false);
+      return;
+    }
+
+    const token = authDetails.data?.token;
+    const tenant_id = authDetails.data?.tenant_id;
+
+    if (!token || !tenant_id) {
+      setError("Token or tenant_id missing in auth details");
+      setLoading(false);
+      return;
+    }
+
+    let payload: CreateUserRequest = {
+      "email": email,
+      "name": name,
+      "password": password,
+      "tenant_id": tenant_id,
+      "user_type": userType,
+      "departments": allDeptData.map((x) => x?.id),
+      "has_org_full_access": allowFullAccess
+
+    }
+    if (userType == 'employee') {
+      // setAllowFullAccess(false)
+      payload['has_org_full_access'] = false
+    }else{
+      allowFullAccess ? payload['departments'] = [] : ''
+    }
+
+    console.log(payload);
+
+    const response = await createDepartmentUser(token, payload);
+
+    console.log(response);
+
+    if (response.success) {
+      console.log(response);
+      let permissionPayload: { user_id: string, tenant_id: string, departments: { id: string, has_file_upload_permission: boolean, has_file_delete_permission: boolean, has_file_view_permission: boolean }[] } = {
+        user_id: response?.data?.id,
+        tenant_id: tenant_id,
+        departments: allDeptData.map((x) => ({ id: x?.id, has_file_upload_permission: x?.permissions?.edit, has_file_delete_permission: x?.permissions?.delete, has_file_view_permission: x?.permissions?.view })),
+      }
+      if (userType == 'admin') {
+        allowFullAccess ? '' : setPermission(token, tenant_id, permissionPayload)
+      }
+    } else {
+      setError(response.error);
+    }
+    setLoading(false);
+    handleClose()
+  }
+
+  const setPermission = async (token: string, tenant_id: string, data: { user_id: string, tenant_id: string, departments: { id: string, has_file_upload_permission: boolean, has_file_delete_permission: boolean, has_file_view_permission: boolean }[] }) => {
+    const response = await grantPermission(token, data);
+    console.log(response);
+    if (response.success) {
+      return response.success
+    } else {
+      setError(response.error);
+      return false
+    }
   }
 
   const handleContinue = () => {
@@ -70,6 +147,12 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
 
     setStep(2)
   }
+
+  useEffect(() => {
+    console.log(selectedDepartments);
+    console.log(allDeptData);
+
+  }, [selectedDepartments])
 
   const handleAddUser = () => {
     // Basic validation
@@ -214,7 +297,7 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
                 />
               </div>
 
-              {userType === "Admin" && (
+              {userType === "admin" && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="allow-access"
@@ -234,7 +317,9 @@ export function AddUserModal({ isOpen, onClose, onAddUser }: AddUserModalProps) 
                   </Label>
                   <DepartmentSelector
                     selectedDepartments={selectedDepartments}
+                    user_type={userType}
                     setSelectedDepartments={setSelectedDepartments}
+                    setAllDeptData={setAllDeptData}
                   />
                 </div>
               )}

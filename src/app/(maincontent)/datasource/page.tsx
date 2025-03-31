@@ -9,7 +9,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { Folder, File, MoreHorizontal, Plus, ChevronDown, ChevronRight, Bell, Layout, User, MoreVertical, EllipsisVertical, XCircle, CheckCircle } from "lucide-react"
+import { Folder, File, MoreHorizontal, Plus, ChevronDown, ChevronRight, Bell, Layout, User, MoreVertical, EllipsisVertical, XCircle, CheckCircle, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,6 +23,7 @@ import { getFileList, syncFile, unSyncFile, uploadFile } from "@/components/apic
 import dayjs from "dayjs"
 import { getCodeFiles } from "@/components/apicalls/importcodefiles"
 import { useToast } from "@/hooks/use-toast"
+import { Checkbox } from "@/components/ui/checkbox"
 
 // Types for our data structure
 type ItemType = "organization" | "department" | "sub-department" | "folder" | "source" | "file"
@@ -73,6 +74,7 @@ export default function DataSourceExplorer() {
     const [orgDetails, setOrgDetails] = useState<any>({});
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
+    const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
     // State for file view
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -322,7 +324,7 @@ export default function DataSourceExplorer() {
         }
         setLoading(false);
     };
-    const BASE_URL = "https://dev.sourcebytes.ai"; // Adjust based on your environment
+    const BASE_URL = "http://35.200.227.29:8000"; // Adjust based on your environment
 
     // Handle file download in development mode needs to be fixed
     const handleDownload = async (fileUrl: string, fileName: string) => {
@@ -396,6 +398,7 @@ export default function DataSourceExplorer() {
         setLoading(false);
     };
     const handleSync = async (doc: any) => {
+        // console.log('ddddddddddddddddddddddddddddddddddd');
         setLoading(true);
         const authDetailsString = sessionStorage.getItem("authDetails");
         if (!authDetailsString) {
@@ -626,26 +629,6 @@ export default function DataSourceExplorer() {
         fetchCodeFiles();
     }, []);
 
-    // Render tree item
-    // const isFolder = (name: string): boolean => {
-    //     // debugger
-    //     for (const department of items?.[0]?.children || []) {
-    //         if (department.name === name && department.is_folder) {
-    //             return true;
-    //         }
-    //         for (const subDept of department.children || []) {
-    //             if (subDept.name === name && subDept.is_folder) {
-    //                 return true;
-    //             }
-    //             for(const dd of subDept.children||[]){
-    //                 if (dd.name === name && dd.is_folder) {
-    //                     return true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // };
     const isFolder = (name: string, departments: any[]): boolean => {
         for (const department of departments) {
             if (department.name === name && department.is_folder) {
@@ -658,6 +641,20 @@ export default function DataSourceExplorer() {
         return false;
     };
 
+    const toggleSelectUser = (userId: string) => {
+        setSelectedDocuments((prev) =>
+            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+        )
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedDocuments?.length === documents?.results?.length) {
+            setSelectedDocuments([])
+        } else {
+            setSelectedDocuments(documents?.results.map((doc: any) => doc.id))
+        }
+    }
+
     /**
      * Render a single tree item.
      * @param {Item} item The tree item to render.
@@ -665,7 +662,7 @@ export default function DataSourceExplorer() {
      * @returns {JSX.Element} The rendered tree item.
      */
     const renderTreeItem = (item: Item, level = 0) => {
-        const isExpandable = item.children && item.children.length > 0
+        const isExpandable = item?.children && item?.children?.length > 0
         // console.log(isExpandable);
 
         const paddingLeft = level * 16
@@ -763,7 +760,7 @@ export default function DataSourceExplorer() {
                                             )}
                                             {/* <span>{item}</span> */}
                                             <span>{item?.name}</span>
-                                            {index == path.length - 1 ? (
+                                            {index == path?.length - 1 ? (
                                                 // <img src="/weui_arrow-outlined.svg" alt="" className="h-6 w-6" />
                                                 <></>
                                             ) : (
@@ -794,181 +791,50 @@ export default function DataSourceExplorer() {
                                     <div className="flex items-center gap-2">
                                         <div className="relative">
                                             <Input className="pl-8 w-64" placeholder="Type to search" />
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                                />
-                                            </svg>
+
+                                            <img src="/search-Icon.svg" alt="" className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                                         </div>
                                         <button className="p-2 hover:bg-gray-100 rounded-md">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                                                />
-                                            </svg>
+                                            <img src="/filter-tick.svg" alt="" className="h-5 w-5" />
                                         </button>
                                         <button className="p-2 hover:bg-gray-100 rounded-md">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                                />
-                                            </svg>
+                                            <img src="/document-download.svg" alt="" className="h-5 w-5" />
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="bg-gray-100 px-4 py-2 flex items-center gap-2 rounded-3xl mb-3 ">
-                                    <button className="p-1 hover:bg-gray-200 rounded">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-4 w-4"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                    <span className="text-sm font-medium">3 selected</span>
-                                    <div className="flex items-center gap-2 ml-4">
+                                {selectedDocuments?.length > 0 && (
+                                    <div className="bg-gray-100 px-4 py-2 flex items-center gap-2 rounded-3xl mb-3 ">
                                         <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                                />
-                                            </svg>
+                                            {/* <img src="/datasource-download.svg" alt="" className="h-5 w-5" /> */}
+                                            <X className="h-4 w-4" />
                                         </button>
-                                        <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M14.828 14.828a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.102-1.101"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button className="p-1 hover:bg-gray-200 rounded">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                                                />
-                                            </svg>
-                                        </button>
+                                        <span className="text-sm font-medium">{selectedDocuments?.length} selected</span>
+                                        <div className="flex items-center gap-2 ml-4">
+                                            <button className="p-1 hover:bg-gray-200 rounded">
+                                                <img src="/datasource-download.svg" alt="" className="h-4 w-4" />
+                                            </button>
+                                            <button className="p-1 hover:bg-gray-200 rounded">
+                                                <img src="/datasource-view.svg" alt="" className="h-4 w-4" />
+                                            </button>
+                                            <button className="p-1 hover:bg-gray-200 rounded">
+                                                <img src="/trash.svg" alt="" className="h-4 w-4" />
+                                            </button>
+
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
                                             <tr className="bg-gray-50 border-b">
                                                 <th className="w-8 p-3 text-left">
-                                                    <input type="checkbox" className="rounded" />
+                                                    {/* <input type="checkbox" className="rounded" /> */}
+                                                    <Checkbox
+                                                        checked={documents?.results?.length > 0 && selectedDocuments?.length === documents?.results?.length}
+                                                        onCheckedChange={toggleSelectAll}
+                                                    />
                                                 </th>
                                                 <th className="text-left p-3 font-medium">Name</th>
                                                 <th className="text-left p-3 font-medium">Status</th>
@@ -982,122 +848,91 @@ export default function DataSourceExplorer() {
                                             {documents?.results && documents?.results.map((doc: any) => (
                                                 <tr key={doc?.id} className="border-t hover:bg-gray-50">
                                                     <td className="p-3">
-                                                        <input type="checkbox" className="rounded" />
+                                                        {/* <input type="checkbox" className="rounded" /> */}
+                                                        <Checkbox
+                                                            checked={selectedDocuments.includes(doc.id)}
+                                                            onCheckedChange={() => toggleSelectUser(doc.id)}
+                                                        />
                                                     </td>
                                                     <td className="p-3">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-5 h-5 bg-yellow-100 flex items-center justify-center rounded">
-                                                                <File className="h-3 w-3 text-yellow-600" />
+                                                            <div className="w-5 h-5 flex items-center justify-center rounded">
+                                                                {/* <File className="h-3 w-3 text-yellow-600" /> */}
+                                                                <img src="/datasource-list-file.svg" alt="" className="h-4 w-4" />
                                                             </div>
                                                             <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-60">{doc?.original_filename}</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-3">
-                                                        <span className="text-orange-500">{doc?.upload_status}</span>
+
+
+                                                        {doc?.upload_status == 'Ready to Sync' ? (
+                                                            <span className="text-gray-800">{doc?.upload_status}</span>
+                                                        ) : doc?.upload_status == 'Ready' ? (
+                                                            <span className="text-green-500">{doc?.upload_status}</span>
+                                                        ) : doc?.upload_status == 'Not Accepted' ? (
+                                                            <span className="text-red-500">{doc?.upload_status}</span>
+                                                        ) : doc?.upload_status == 'Processing!' ? (
+                                                            <span className="text-blue-500">{doc?.upload_status}</span>
+                                                        ) : (
+                                                            <span className="text-orange-500">{doc?.upload_status}</span>
+                                                        )}
                                                     </td>
                                                     <td className="p-3">{doc?.last_sync ? dayjs(doc?.last_sync).format('hh:mm:ss | DD-MM-YYYY') : '-'}</td>
                                                     <td className="p-3">{doc?.file_size_kb}</td>
                                                     <td className="p-3">
-                                                        <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
-                                                            <svg
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                className="h-4 w-4"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                                stroke="currentColor"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                                                />
-                                                            </svg>
-                                                        </button>
+                                                        {doc?.upload_status == 'Ready to Sync' ? (
+                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+
+                                                                <img src="/datasource-sync.svg" alt="" className="h-5 w-5" />
+                                                            </button>
+                                                        ) : doc?.upload_status == 'Ready' ? (
+                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+
+                                                                <img src="/datasource-sync-green.svg" alt="" className="h-5 w-5" />
+                                                            </button>
+                                                        ) : doc?.upload_status == 'Not Accepted' ? (
+                                                            <button className="text-gray-500 hover:text-gray-700" >
+
+                                                                <>-</>
+                                                            </button>
+                                                        ) : doc?.upload_status == 'Processing!' ? (
+                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+                                                                <img src="/datasource-sync-orange.svg" alt="" className="h-5 w-5" />
+                                                            </button>
+
+                                                        ) : (
+                                                            <button className="text-gray-500 hover:text-gray-700" >
+                                                                <>-</>
+                                                            </button>
+                                                        )}
                                                     </td>
                                                     <td className="p-3">
-                                                        <div className="flex items-center gap-2 text-gray-500">
+                                                        <div className="flex items-center gap-3 text-gray-500">
                                                             <button
                                                                 className="hover:text-gray-700"
                                                                 onClick={() => handleDownload(doc.file, doc.original_filename)}
                                                                 title="Download"
                                                             >
-                                                                <svg
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    className="h-4 w-4"
-                                                                    fill="none"
-                                                                    viewBox="0 0 24 24"
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                                                    />
-                                                                </svg>
+                                                                <img src="/datasource-download.svg" alt="" className="h-5 w-5" />
                                                             </button>
                                                             <button
                                                                 className="hover:text-gray-700"
                                                                 onClick={() => handleView(doc.file)}
                                                                 title="View"
                                                             >
-                                                                <svg
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    className="h-4 w-4"
-                                                                    fill="none"
-                                                                    viewBox="0 0 24 24"
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                                    />
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                                    />
-                                                                </svg>
+
+                                                                <img src="/datasource-view.svg" alt="" className="h-5 w-5" />
                                                             </button>
-                                                            <button className="hover:text-gray-700">
-                                                                <svg
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    className="h-4 w-4"
-                                                                    fill="none"
-                                                                    viewBox="0 0 24 24"
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                                                                    />
-                                                                </svg>
-                                                            </button>
+                                                            {/* <button className="hover:text-gray-700">
+                                                                <img src="/send-2.svg" alt="" className="h-5 w-5" />
+                                                            </button> */}
                                                             <button
                                                                 className="hover:text-gray-700"
                                                                 onClick={() => handleDelete(doc.id)}
                                                                 title="Delete"
                                                             >
-                                                                <svg
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    className="h-4 w-4"
-                                                                    fill="none"
-                                                                    viewBox="0 0 24 24"
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                                    />
-                                                                </svg>
+                                                                <img src="/trash.svg" alt="" className="h-5 w-5" />
                                                             </button>
                                                         </div>
                                                     </td>

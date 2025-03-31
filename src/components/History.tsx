@@ -85,8 +85,8 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
 
     return (
         <aside
-            className={`${isOpen ? "w-60 md:w-80 p-5" : "w-0 p-0"
-                } border-l border-zinc-200 bg-zinc-100  md:relative absolute right-0 md:flex flex-col md:h-[calc(100vh-100px)] min-h-[calc(100vh-100px)] transition-all duration-300`}
+            className={`${isOpen ? "w-60 md:w-80 p-5 bg-zinc-100" : "w-5 p-0 bg-white"
+                } border-l border-zinc-200   md:relative absolute right-0 md:flex flex-col md:h-[calc(100vh-100px)] min-h-[calc(100vh-100px)] transition-all duration-300`}
         >
             {/* Main Content (only when open) */}
             {isOpen && (

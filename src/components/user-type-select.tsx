@@ -13,7 +13,7 @@ interface UserTypeSelectProps {
 export function UserTypeSelect({ value, onChange, isOpen, setIsOpen }: UserTypeSelectProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const userTypes = ["Employee", "Admin"]
+  const userTypes = ["employee", "admin"]
 
   // Close dropdown when clicking outside
   useEffect(() => {

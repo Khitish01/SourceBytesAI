@@ -7,7 +7,7 @@ export async function getDepartmentList(
     token: string,
     tenant_id: string
 ): Promise<any> {
-    const url = `${BASE_URL}/tenants/${tenant_id}/dept/`;
+    const url = `${BASE_URL}/tenants/${tenant_id}/dept-list/`;
     try {
         const response = await fetch(url, {
             method: "GET",
@@ -39,7 +39,7 @@ export async function createDepartment(
     formData: { name: string, parent?: string, is_folder?: boolean },
     tenant_id: string
 ): Promise<any> {
-    const url = `${BASE_URL}/tenants/${tenant_id}/dept/`;
+    const url = `${BASE_URL}/tenants/${tenant_id}/dept-create/`;
     // console.log(url);
 
     //   https://dev.sourcebytes.ai/api/v1/tenants/1cf29321-f9fa-4ee1-9df3-301a740e9662/dept/
@@ -123,7 +123,7 @@ export async function deleteDepartment(
     tenant_id: string,
     department_id: string | undefined
 ): Promise<any> {
-    const url = `${BASE_URL}/tenants/${tenant_id}/dept/?department_id=${department_id}`;
+    const url = `${BASE_URL}/tenants/${tenant_id}/dept-delete/?department_id=${department_id}`;
 
     try {
         const response = await fetch(url, {

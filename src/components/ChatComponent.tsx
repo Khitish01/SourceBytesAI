@@ -1,3 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -15,6 +18,9 @@ import TypingIndicator from "./typing-indicator";
 import CodeEditor from "./code-editor";
 import hljs from "highlight.js";
 import { useMediaQuery } from "react-responsive";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github.css";
 
 const dummyFiles = [
     { id: 1, name: "Paracetamol.zip" },
@@ -111,16 +117,15 @@ export const ChatComponent = () => {
     const [suggestions, setSuggestions] = useState<typeof dummyFiles>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [searchTerm, setSearchTerm] = useState(""); // Track the search term after /
-
-    // State for preview/edit modal
+    const [searchTerm, setSearchTerm] = useState("");
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<{ blob: Blob; filename: string } | null>(null);
     const [editedContent, setEditedContent] = useState("");
+    const [isNewConversation, setIsNewConversation] = useState<boolean>(false); // Track if it's a new conversation
 
-    useEffect(()=>{
-        setIsHistoryOpen(!isMobile)
-    },[isMobile])
+    useEffect(() => {
+        setIsHistoryOpen(!isMobile);
+    }, [isMobile]);
 
     const debouncedSearch = useCallback((searchTerm: string) => {
         if (debounceTimeoutRef.current) {
@@ -156,7 +161,6 @@ export const ChatComponent = () => {
     const handleSuggestionSelect = (fileName: string) => {
         const blob = new Blob([`Content of ${fileName}`], { type: "text/plain" });
         setAttachedFiles((prev) => [...prev, { blob, filename: fileName }]);
-        // Set input text with the search term in bold (using a visual cue like **)
         const formattedText = fileName.replace(
             new RegExp(`(${searchTerm})`, "i"),
             `**$1**`
@@ -259,6 +263,17 @@ export const ChatComponent = () => {
         if (inputText.trim() === "" && attachedFiles.length === 0) return;
         const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
         const token = authDetails?.data?.token;
+        const tenant_id = authDetails?.data?.tenant_id;
+        if (!token) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Authentication token not found",
+                duration: 5000,
+            });
+            return;
+        }
+
         setIsGenerating(true);
         const userMessage = {
             id: Math.floor(Math.random() * 10000000).toString(),
@@ -273,29 +288,57 @@ export const ChatComponent = () => {
         setAttachedFiles([]);
         setInputText("");
         setIsSending(true);
+
         try {
             const chatResponse = await sendChat(token, {
                 message: inputText,
                 conversation_id: selectedHistory?.id || "",
+                tenant_id: tenant_id,
             });
+
+            if (!chatResponse.success) {
+                throw new Error(chatResponse.error);
+            }
+            console.log(chatResponse);
+            // loadListings(selectedHistory)
+
+
             const agentMessage = {
-                id: chatResponse.data.data.assistant_response.id,
-                message: chatResponse.data.data.assistant_response.message,
+                id: Math.floor(Math.random() * 10000000).toString(),
+                message: chatResponse?.data?.full_response,
                 message_author_type: "assistant",
-                conversation_id: chatResponse.data.data.assistant_response.conversation_id,
-                created_at: chatResponse.data.data.assistant_response.created_at,
-                updated_at: chatResponse.data.data.assistant_response.updated_at,
+                conversation_id: selectedHistory?.id || chatResponse?.data?.conversation_id,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
             };
+
             setMessages((prevMessages) => [...prevMessages, agentMessage]);
+
+            // Force a re-render
+            setMessages((prev) => [...prev]);
+
+            console.log(messages);
+
             setIsSending(false);
+
+            // If there's no selected history, create a new conversation and select it
             if (!selectedHistory) {
-                setNewChat(agentMessage.conversation_id);
-                setSelectedHistory({
-                    created_at: agentMessage.created_at,
-                    id: agentMessage.conversation_id,
+                const newConversationId = chatResponse?.data?.conversation_id; // Placeholder
+                const newConversation = {
+                    created_at: new Date().toISOString(),
+                    id: newConversationId,
                     name: userMessage.message || "Attached files",
-                    updated_at: agentMessage.updated_at,
-                });
+                    updated_at: new Date().toISOString(),
+                };
+
+                // Update the newChat state to notify ChatHistory of the new conversation
+                setNewChat(newConversation);
+
+                // Automatically select the new conversation
+                setSelectedHistory(newConversation);
+                setIsNewConversation(true); // Mark as new conversation to avoid fetching history
+            } else {
+                setIsNewConversation(false); // Reset for existing conversations
             }
         } catch (error) {
             toast({
@@ -339,24 +382,68 @@ export const ChatComponent = () => {
         }
     };
 
-    const loadListings = async (selectedHistory: any) => {
+    const loadListings = async (history: any) => {
+        // Skip fetching history for new conversations with placeholder IDs
+        if (isNewConversation || !history?.id || history.id.startsWith("new-")) {
+            return; // Keep the locally stored messages
+        }
+
         try {
             const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
             if (!token) throw new Error("No auth token found");
-            const fetchedListings = await getChatHistory(token, selectedHistory?.id);
-            setMessages(fetchedListings?.data?.messages);
+
+            const fetchedListings = await getChatHistory(token, history.id);
+            console.log(fetchedListings);
+
+            if (fetchedListings?.data?.messages) {
+                setMessages(fetchedListings.data.messages);
+            } else {
+                // Don't clear messages if the API returns no messages; keep local messages
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "No messages found for this conversation",
+                    duration: 5000,
+                });
+            }
         } catch (error) {
-            console.error(error);
+            console.error("Error loading chat history:", error);
+            // Don't clear messages on error; keep local messages
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to load chat history",
+                duration: 5000,
+            });
         }
     };
+    const processMarkdown = (text: any) => {
+        if (!text) return ""
+
+        // Remove any potential script tags for security
+        text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+
+        // Handle code blocks with language specification
+        text = text.replace(/```(\w+)\n([\s\S]*?)```/g, (match: any, language: any, code: any) => {
+            return `\`\`\`${language}\n${code.trim()}\n\`\`\``
+        })
+
+        // Ensure proper spacing for lists
+        text = text.replace(/^\s*[-*+]\s+/gm, "- ")
+        text = text.replace(/^\s*(\d+)\.\s+/gm, "$1. ")
+
+        return text
+    }
 
     useEffect(() => {
         if (selectedHistory) {
+            setIsNewConversation(false);
             loadListings(selectedHistory);
         } else {
-            setMessages([]);
+            setMessages([]); // Clear messages when no history is selected
         }
+
         return () => {
             speechSynthesis.cancel();
             setPlayingMessageId(null);
@@ -371,7 +458,7 @@ export const ChatComponent = () => {
             <div className="flex-1 flex flex-col">
                 <div className="flex-1 flex relative">
                     <main className="flex-1 flex flex-col md:p-6 max-w-4xl mx-auto w-full relative h-[calc(100vh-100px)]">
-                        <div className={`flex-1 overflow-y-auto chat-container ${messages?.length > 0 ? "md:mb-20 mb-40" : ""}`}>
+                        <div className={`flex-1 overflow-y-auto chat-container ${messages?.length > 0 ? (attachedFiles.length > 0 ? "mb-52" : "md:mb-28 mb-40") : ""}`}>
                             {messages?.length === 0 ? (
                                 <div className="h-[calc(100vh-12rem)] flex items-center justify-center">
                                     <div className="text-center space-y-6">
@@ -384,7 +471,7 @@ export const ChatComponent = () => {
                                         {messages?.map((message) => (
                                             <div
                                                 key={message.id}
-                                                className={`flex ${message.message_author_type === "user" ? "justify-end" : "justify-start items-center"}`}
+                                                className={`group flex gap-2 ${message.message_author_type === "user" ? "justify-end" : "justify-start items-center"}`}
                                             >
                                                 {message.message_author_type !== "user" && (
                                                     <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center mr-1 shrink-0 overflow-hidden">
@@ -398,15 +485,68 @@ export const ChatComponent = () => {
                                                     </div>
                                                 )}
                                                 <div
-                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : "bg-zinc-100 ml-8"} group relative flex items-center gap-2`}
+                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : "bg-zinc-100 ml-8"} relative `}
                                                 >
-                                                    <p className="text-sm flex-1 " style={{wordBreak:"break-word"}}>{message.message}</p>
+                                                    <div className="text-sm flex-1 break-words whitespace-normal overflow-hidden" >
+
+                                                        {message.message_author_type === "user" ? (
+                                                            (message.message)
+                                                        ) : (
+                                                            <ReactMarkdown
+                                                                components={{
+                                                                    pre: ({ node, ...props }) => (
+                                                                        <div className="overflow-auto w-full my-2 bg-gray-800 p-2 rounded-md">
+                                                                            <pre {...props} />
+                                                                        </div>
+                                                                    ),
+                                                                    code: ({ node, className, children, ...props }) => {
+                                                                        const match = /language-(\w+)/.exec(className || "")
+                                                                        const isInline = !match && !className
+                                                                        if (isInline) {
+                                                                            return (
+                                                                                <code className="bg-gray-200 px-1 py-0.5 rounded text-sm" {...props}>
+                                                                                    {children}
+                                                                                </code>
+                                                                            )
+                                                                        }
+                                                                        return (
+                                                                            <code className={`${className} block text-white`} {...props}>
+                                                                                {children}
+                                                                            </code>
+                                                                        )
+                                                                    },
+                                                                    p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+                                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-2" {...props} />,
+                                                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-2" {...props} />,
+                                                                    li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                                                                    a: ({ node, ...props }) => <a className="text-blue-500 hover:underline" {...props} />,
+                                                                    blockquote: ({ node, ...props }) => (
+                                                                        <blockquote className="border-l-4 border-gray-300 pl-4 italic my-2" {...props} />
+                                                                    ),
+                                                                    table: ({ node, ...props }) => (
+                                                                        <div className="overflow-x-auto">
+                                                                            <table className="min-w-full border-collapse border border-gray-300" {...props} />
+                                                                        </div>
+                                                                    ),
+                                                                    th: ({ node, ...props }) => (
+                                                                        <th className="border border-gray-300 px-4 py-2 bg-gray-100" {...props} />
+                                                                    ),
+                                                                    td: ({ node, ...props }) => (
+                                                                        <td className="border border-gray-300 px-4 py-2" {...props} />
+                                                                    ),
+                                                                }}
+                                                            >
+                                                                {message.message}
+                                                            </ReactMarkdown>
+                                                        )}
+                                                    </div>
+
                                                     {message.attachedFiles?.length > 0 && (
                                                         <div className="mt-2">
                                                             <span>Attached files:</span>
                                                             <ul>
                                                                 {message.attachedFiles.map((file: { blob: Blob; filename: string }, index: number) => (
-                                                                    <li key={index}>
+                                                                    <li className="text-blue-500 hover:underline cursor-pointer file-link" key={index}>
                                                                         <button
                                                                             onClick={() => handleFilePreview(file)}
                                                                             className="text-blue-500 hover:underline cursor-pointer file-link"
@@ -419,25 +559,26 @@ export const ChatComponent = () => {
                                                             </ul>
                                                         </div>
                                                     )}
-                                                    {message.message_author_type !== "user" && (
-                                                        <button
-                                                            onClick={() => handlePlayMessage(message.id, message.message)}
-                                                            className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-200 hover:scale-110"
-                                                        >
-                                                            {playingMessageId === message.id ? (
-                                                                <FaStop className="text-gray-400 text-xs" />
-                                                            ) : (
-                                                                <FaPlay className="text-gray-400 text-xs" />
-                                                            )}
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleCopyMessage(message.message)}
-                                                        className="text-zinc-500 hover:text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                    >
-                                                        <FiCopy className="w-4 h-4" />
-                                                    </button>
+
                                                 </div>
+                                                {message.message_author_type !== "user" && (
+                                                    <button
+                                                        onClick={() => handlePlayMessage(message.id, message.message)}
+                                                        className="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-200 hover:scale-110"
+                                                    >
+                                                        {playingMessageId === message.id ? (
+                                                            <FaStop className="text-gray-400 text-xs" />
+                                                        ) : (
+                                                            <FaPlay className="text-gray-400 text-xs" />
+                                                        )}
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => handleCopyMessage(message.message)}
+                                                    className="text-zinc-500 hover:text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                >
+                                                    <FiCopy className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         ))}
                                         {isSending && (
@@ -565,7 +706,6 @@ export const ChatComponent = () => {
                 </div>
             </div>
 
-            {/* Updated Modal with CodeEditor */}
             {isPreviewOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-1000">
                     <div className="bg-gradient-to-r from-[#fef4e5] to-[#f9cda1] md:mt-10 rounded-2xl p-6 w-[90%] h-[85%] md:h-[90%] md:w-[45%]">

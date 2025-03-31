@@ -56,7 +56,7 @@ const Dashboard = () => {
 
     // Render dashboard content once role is determined
     return (
-        <div>
+        <div className="max-w-[calc(100vw - 10rem)]">
             {role === "superuser" ? <SuperAdmindashboard /> : <ChatComponent />}
         </div>
     );

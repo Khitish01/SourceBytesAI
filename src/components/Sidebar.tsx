@@ -69,7 +69,7 @@ export const Sidebar = () => {
         <>
             <aside
                 className={cn(
-                    "h-screen bg-zinc-800 text-white left-0 top-0 z-50 md:relative absolute flex flex-col transition-all duration-300 ease-in-out",
+                    "h-screen bg-zinc-800 text-white left-0 top-0 z-50 md:relative absolute flex flex-col transition-all duration-300 ease-in-out overflow-auto",
                     isExpanded ? "w-80" : "md:w-20 w-0"
                 )}
             >
