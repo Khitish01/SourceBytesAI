@@ -36,7 +36,7 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
 
             const fetchedListings = await getHistory(token);
             setListings(fetchedListings.data);
-            historyData ? setSelectedId(historyData) : setSelectedId('')
+            historyData ? setSelectedId(historyData.id) : setSelectedId('')
         } catch (error) {
             console.error(error);
         } finally {
