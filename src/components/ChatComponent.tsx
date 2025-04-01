@@ -123,8 +123,10 @@ export const ChatComponent = () => {
     const [selectedFile, setSelectedFile] = useState<{ blob: Blob; filename: string } | null>(null);
     const [editedContent, setEditedContent] = useState("");
     const [isNewConversation, setIsNewConversation] = useState<boolean>(false); // Track if it's a new conversation
+    const [displayedMessage, setDisplayedMessage] = useState("");
+    const typingSpeed = 10; // Adjust speed for typewriter effect
     const router = useRouter()
-
+    
     useEffect(() => {
         setIsHistoryOpen(!isMobile);
     }, [isMobile]);
@@ -248,7 +250,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [messages, displayedMessage]);
 
     const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
@@ -261,11 +263,13 @@ export const ChatComponent = () => {
         }
     };
 
+
     const handleSendMessage = async () => {
         if (inputText.trim() === "" && attachedFiles.length === 0) return;
         const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
         const token = authDetails?.data?.token;
         const tenant_id = authDetails?.data?.tenant_id;
+
         if (!token) {
             toast({
                 variant: "destructive",
@@ -301,31 +305,40 @@ export const ChatComponent = () => {
             if (!chatResponse.success) {
                 throw new Error(chatResponse.error);
             }
-            console.log(chatResponse);
-            // loadListings(selectedHistory)
 
+            const fullResponse = chatResponse?.data?.full_response || "";
+            let index = 0;
+            setDisplayedMessage(""); // Reset displayed message
+            // setIsSending(false)
 
+            // Simulate typewriter effect
+            const interval = setInterval(() => {
+                if (index < fullResponse.length) {
+                    setDisplayedMessage((prev) => prev + fullResponse[index]);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, typingSpeed);
+
+            // Store the full response message
             const agentMessage = {
                 id: Math.floor(Math.random() * 10000000).toString(),
-                message: chatResponse?.data?.full_response,
+                message: fullResponse, // Store full message
                 message_author_type: "assistant",
                 conversation_id: selectedHistory?.id || chatResponse?.data?.conversation_id,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             };
 
-            setMessages((prevMessages) => [...prevMessages, agentMessage]);
+            setTimeout(() => {
+                setMessages((prevMessages) => [...prevMessages, agentMessage]);
+                setIsSending(false);
+                setDisplayedMessage("");
+            }, fullResponse.length * typingSpeed); // Delay full message display
 
-            // Force a re-render
-            setMessages((prev) => [...prev]);
-
-            console.log(messages);
-
-            setIsSending(false);
-
-            // If there's no selected history, create a new conversation and select it
             if (!selectedHistory) {
-                const newConversationId = chatResponse?.data?.conversation_id; // Placeholder
+                const newConversationId = chatResponse?.data?.conversation_id;
                 const newConversation = {
                     created_at: new Date().toISOString(),
                     id: newConversationId,
@@ -333,14 +346,11 @@ export const ChatComponent = () => {
                     updated_at: new Date().toISOString(),
                 };
 
-                // Update the newChat state to notify ChatHistory of the new conversation
                 setNewChat(newConversation);
-
-                // Automatically select the new conversation
                 setSelectedHistory(newConversation);
-                setIsNewConversation(true); // Mark as new conversation to avoid fetching history
+                setIsNewConversation(true);
             } else {
-                setIsNewConversation(false); // Reset for existing conversations
+                setIsNewConversation(false);
             }
         } catch (error) {
             toast({
@@ -352,8 +362,10 @@ export const ChatComponent = () => {
             console.error(error);
             setIsSending(false);
         }
+
         setIsGenerating(false);
     };
+
 
     const handleCopyMessage = (text: string) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -597,17 +609,66 @@ export const ChatComponent = () => {
                                                 </div>
                                                 <div className="py-2 p-4 rounded-3xl max-w-[80%] bg-zinc-100 ml-8 group relative flex items-center gap-2">
                                                     <div className="text-sm flex-1">
-                                                        <TypingIndicator />
+                                                        {displayedMessage != '' ? (
+                                                            <ReactMarkdown
+                                                                components={{
+                                                                    pre: ({ node, ...props }) => (
+                                                                        <div className="overflow-auto w-full my-2 bg-gray-800 p-2 rounded-md">
+                                                                            <pre {...props} />
+                                                                        </div>
+                                                                    ),
+                                                                    code: ({ node, className, children, ...props }) => {
+                                                                        const match = /language-(\w+)/.exec(className || "")
+                                                                        const isInline = !match && !className
+                                                                        if (isInline) {
+                                                                            return (
+                                                                                <code className="bg-gray-200 px-1 py-0.5 rounded text-sm" {...props}>
+                                                                                    {children}
+                                                                                </code>
+                                                                            )
+                                                                        }
+                                                                        return (
+                                                                            <code className={`${className} block text-white`} {...props}>
+                                                                                {children}
+                                                                            </code>
+                                                                        )
+                                                                    },
+                                                                    p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+                                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-2" {...props} />,
+                                                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-2" {...props} />,
+                                                                    li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                                                                    a: ({ node, ...props }) => <a className="text-blue-500 hover:underline" {...props} />,
+                                                                    blockquote: ({ node, ...props }) => (
+                                                                        <blockquote className="border-l-4 border-gray-300 pl-4 italic my-2" {...props} />
+                                                                    ),
+                                                                    table: ({ node, ...props }) => (
+                                                                        <div className="overflow-x-auto">
+                                                                            <table className="min-w-full border-collapse border border-gray-300" {...props} />
+                                                                        </div>
+                                                                    ),
+                                                                    th: ({ node, ...props }) => (
+                                                                        <th className="border border-gray-300 px-4 py-2 bg-gray-100" {...props} />
+                                                                    ),
+                                                                    td: ({ node, ...props }) => (
+                                                                        <td className="border border-gray-300 px-4 py-2" {...props} />
+                                                                    ),
+                                                                }}
+                                                            >
+                                                                {displayedMessage}
+                                                            </ReactMarkdown>
+                                                        ) : (<TypingIndicator />)}
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
+
+
                                         <div ref={chatEndRef} />
                                     </div>
 
                                     <div className="flex justify-center items-center cursor-pointer mt-7">
                                         <div className="w-[25%] bg-[#F0F0F0] p-3 flex justify-center items-center gap-3 font-medium">
-                                            <img src="/refresh.svg" alt="" className="h-5 w-5"/>
+                                            <img src="/refresh.svg" alt="" className="h-5 w-5" />
                                             <span>Regenerate Response</span> </div>
                                     </div>
                                 </>
@@ -650,7 +711,7 @@ export const ChatComponent = () => {
                                     {isListening ? (
                                         <PiRecordFill className="w-6 h-6 text-red-700" />
                                     ) : (
-                                        <img src="/microphone-2.svg" alt=""  className="w-6 h-6"/>
+                                        <img src="/microphone-2.svg" alt="" className="w-6 h-6" />
                                     )}
                                 </button>
 
@@ -681,7 +742,7 @@ export const ChatComponent = () => {
                                     />
                                     <button
                                         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 p-1 rounded"
-                                        title="Switch to code editor" onClick={()=>router.push('/datasource')}
+                                        title="Switch to code editor" onClick={() => router.push('/datasource')}
                                     >
                                         <img src="/Upload.svg" className="w-5 h-5" alt="Send" />
                                     </button>

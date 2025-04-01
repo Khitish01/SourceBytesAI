@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { CiTrash } from "react-icons/ci";
 import { History } from "lucide-react";
-import { deleteAllHistory, deleteHistoryById, getHistory } from './apicalls/chat';
+import { deleteAllHistory, deleteHistoryById, getConversasionTitle, getHistory } from './apicalls/chat';
 import { ConfirmationModal } from './confirmation-modal';
 import Loader from './Loader';
 import { useLanguage } from '@/context/LanguageContext';
@@ -17,14 +17,19 @@ interface ChatHistoryProps {
 }
 
 export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }: ChatHistoryProps) => {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState<any[]>([]);
     const [isModelOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedId, setSelectedId] = useState<string>("");
     const { translations } = useLanguage();
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [listings]);
 
     const loadListings = async () => {
-        setLoading(true);
+        // setLoading(true);
         try {
             const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
             const token = authDetails?.data?.token;
@@ -40,7 +45,7 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            // setLoading(false);
         }
     };
 
@@ -77,8 +82,19 @@ export const ChatHistory = ({ historyData, onHistorySelect, isOpen, setIsOpen }:
             console.error(error);
         }
     }
-    const handleCheckboxChange = (item: any) => {
+    const handleCheckboxChange = async (item: any) => {
         const newSelectedId = selectedId === item.id ? null : item.id
+        console.log(newSelectedId);
+        console.log(selectedId);
+
+        if (newSelectedId == null) {
+            // debugger
+            const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
+            const token = authDetails?.data?.token;
+            const fetchedListings = await getConversasionTitle(token, selectedId);
+            loadListings()
+        }
+
         setSelectedId(newSelectedId)
         onHistorySelect(newSelectedId ? item : null)
     }

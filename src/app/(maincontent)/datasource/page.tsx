@@ -218,13 +218,13 @@ export default function DataSourceExplorer() {
     const transformData = (orgDetails: any, apiData: any[]): Item[] => {
 
         const buildHierarchy = (department: any): Item => ({
-            id: department.id,
-            name: department.name,
-            type: department.is_folder ? 'folder' : department.parent == null ? 'department' : 'sub-department',
+            id: department?.id,
+            name: department?.name,
+            type: department?.is_folder ? 'folder' : department?.parent == null ? 'department' : 'sub-department',
             expanded: false,
-            path: department.path,
-            is_folder: department.is_folder,
-            children: department.sub_departments.map(buildHierarchy), // Recursively process sub-departments
+            path: department?.path,
+            is_folder: department?.is_folder,
+            children: department?.sub_departments?.map(buildHierarchy), // Recursively process sub-departments
         });
         // children: dept.sub_departments.map((subDept: any) => ({
         //     ...subDept,
@@ -236,9 +236,7 @@ export default function DataSourceExplorer() {
                 name: orgDetails?.name,
                 type: 'organization',
                 expanded: false,
-                children: apiData
-                    .filter(dept => dept.parent === null)
-                    .map(buildHierarchy), // Build hierarchy for top-level departments
+                children: apiData?.filter(dept => dept?.parent === null)?.map(buildHierarchy), // Build hierarchy for top-level departments
             },
         ];
     };
@@ -277,16 +275,16 @@ export default function DataSourceExplorer() {
         if (response.success) {
             console.log(response.data.results);
 
-            const apiData = transformData(orgDetails.data, response.data.results);
-            setItems(apiData);
             // setSyncStatuses(new Map(apiData.map((file: FileData) => [file.id, { status: "idle" }])));
         } else {
             setError(response.error);
         }
+        const apiData = transformData(orgDetails?.data, response?.data?.results);
+        setItems(apiData);
         setLoading(false);
     };
     const getDocumentList = async (department_id: string, page: number, pageSize: number) => {
-        console.log('sssssssssss');
+        // console.log('sssssssssss');
         setLoading(true);
         const authDetailsString = sessionStorage.getItem("authDetails");
         if (!authDetailsString) {
