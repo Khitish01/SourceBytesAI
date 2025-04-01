@@ -9,11 +9,13 @@ import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useMediaQuery } from "react-responsive";
+import { useSidebar } from "@/context/SidebarContext";
 
 const PAGE_URL = process.env.WEB_URL || "https://www.sourcebytes.ai"
 
 export const Sidebar = () => {
 
+    const { isSidebarOpen, toggleSidebar } = useSidebar();
     const isMobile = useMediaQuery({ query: "(max-width: 1439px)" });
 
     const [isExpanded, setIsExpanded] = useState(!isMobile);
@@ -24,6 +26,7 @@ export const Sidebar = () => {
     const { translations } = useLanguage();
     useEffect(() => {
         setIsExpanded(!isMobile)
+        toggleSidebar()
     }, [isMobile])
 
     useEffect(() => {
@@ -95,7 +98,10 @@ export const Sidebar = () => {
                         </span>
                     </div>
                     <button
-                        onClick={() => setIsExpanded(!isExpanded)}
+                        onClick={() =>{
+                            toggleSidebar();
+                             setIsExpanded(!isExpanded)
+                            }}
                         className={`p-2 rounded-lg text-lg bg-zinc-800 absolute  ${isExpanded ? 'right-1' : 'md:left-10 left-0 top-3'} transition-all duration-300 ease-in-out`}
                     >
                         <TbLayoutSidebarFilled className="h-5 w-5 pointer-events-auto" />

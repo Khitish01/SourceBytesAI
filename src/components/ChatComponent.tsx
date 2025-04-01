@@ -22,6 +22,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github.css";
 import { useRouter } from "next/navigation";
+import { useSidebar } from "@/context/SidebarContext";
 
 const dummyFiles = [
     { id: 1, name: "Paracetamol.zip" },
@@ -99,6 +100,7 @@ const detectLanguage = (text: string): { extension: string; mimeType: string } =
 };
 
 export const ChatComponent = () => {
+    const { isSidebarOpen, toggleSidebar } = useSidebar();
     const isMobile = useMediaQuery({ query: "(max-width: 1023px)" });
     const [messages, setMessages] = useState<any[]>([]);
     const [inputText, setInputText] = useState("");
@@ -372,14 +374,14 @@ export const ChatComponent = () => {
         return new Promise((resolve) => {
             let index = 0;
             const startTime = performance.now();
-    
+
             const type = () => {
                 if (index < fullResponse.length) {
                     // Instead of adding one character at a time, add in small chunks
                     const nextChunk = Math.min(index + 10, fullResponse.length); // Add 3 characters per frame
                     setDisplayedMessage((prev) => prev + fullResponse.slice(index, nextChunk));
                     index = nextChunk;
-    
+
                     // Use requestAnimationFrame for smoother updates
                     if (index < fullResponse.length) {
                         requestAnimationFrame(type);
@@ -389,7 +391,7 @@ export const ChatComponent = () => {
                     }
                 }
             };
-    
+
             requestAnimationFrame(type);
         });
     };
@@ -613,7 +615,7 @@ export const ChatComponent = () => {
                             ) : (
                                 // <div className="p-6 rounded-xl w-full bg-gradient-to-r from-[#fef4e5] to-[#f9cda1] ">
                                 <>
-                                    <div className="space-y-4 bg-white rounded-xl p-4 h-[calc(100vh-350px)] w-[calc(100vw-48rem)] chat-container overflow-y-auto">
+                                    <div className={`space-y-4 bg-white rounded-xl p-4 h-[calc(100vh-350px)] ${isHistoryOpen && !isSidebarOpen  ? 'w-[calc(100vw-48rem)]'  : (isHistoryOpen || !isSidebarOpen)  ? 'w-[calc(100vw-32rem)]'  : 'w-[calc(100vw-13rem)]' }  chat-container overflow-y-auto`}>
                                         {messages?.map((message) => (
                                             <div
                                                 key={message.id}

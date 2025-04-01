@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 
 const geistSans = Geist({
@@ -31,8 +32,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LanguageProvider>
-          {children}
-          <Toaster />
+          <SidebarProvider>  {/* Wrap your app with SidebarProvider */}
+            {children}
+            <Toaster />
+          </SidebarProvider>
         </LanguageProvider>
 
       </body>
