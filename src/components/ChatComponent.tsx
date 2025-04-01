@@ -124,9 +124,9 @@ export const ChatComponent = () => {
     const [editedContent, setEditedContent] = useState("");
     const [isNewConversation, setIsNewConversation] = useState<boolean>(false); // Track if it's a new conversation
     const [displayedMessage, setDisplayedMessage] = useState("");
-    const typingSpeed = 10; // Adjust speed for typewriter effect
+    const typingSpeed = 15; // Adjust speed for typewriter effect
     const router = useRouter()
-    
+
     useEffect(() => {
         setIsHistoryOpen(!isMobile);
     }, [isMobile]);
@@ -264,6 +264,135 @@ export const ChatComponent = () => {
     };
 
 
+    // const handleSendMessage = async () => {
+    //     if (inputText.trim() === "" && attachedFiles.length === 0) return;
+    //     const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
+    //     const token = authDetails?.data?.token;
+    //     const tenant_id = authDetails?.data?.tenant_id;
+
+    //     if (!token) {
+    //         toast({
+    //             variant: "destructive",
+    //             title: "Error",
+    //             description: "Authentication token not found",
+    //             duration: 5000,
+    //         });
+    //         return;
+    //     }
+
+    //     setIsGenerating(true);
+    //     const userMessage = {
+    //         id: Math.floor(Math.random() * 10000000).toString(),
+    //         message: inputText,
+    //         message_author_type: "user",
+    //         conversation_id: selectedHistory?.id || "",
+    //         created_at: new Date().toISOString(),
+    //         updated_at: new Date().toISOString(),
+    //         attachedFiles: [...attachedFiles],
+    //     };
+    //     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    //     setAttachedFiles([]);
+    //     setInputText("");
+    //     let index = 0;
+    //     setDisplayedMessage("");
+    //     setIsSending(true);
+
+    //     try {
+    //         const chatResponse = await sendChat(token, {
+    //             message: inputText,
+    //             conversation_id: selectedHistory?.id || "",
+    //             tenant_id: tenant_id,
+    //         });
+
+    //         if (!chatResponse.success) {
+    //             throw new Error(chatResponse.error);
+    //         }
+
+    //         const fullResponse = chatResponse?.data?.full_response || "";
+    //         // let index = 0;
+    //         // setDisplayedMessage(""); // Reset displayed message
+    //         // setIsSending(false)
+
+    //         // Simulate typewriter effect
+    //         const interval = setInterval(() => {
+    //             if (index < fullResponse.length) {
+    //                 setDisplayedMessage((prev) => prev + fullResponse[index]);
+    //                 index++;
+    //             } else {
+    //                 clearInterval(interval);
+    //                 setIsSending(false)
+    //             }
+    //         }, typingSpeed);
+
+    //         // Store the full response message
+    //         const agentMessage = {
+    //             id: Math.floor(Math.random() * 10000000).toString(),
+    //             message: fullResponse, // Store full message
+    //             message_author_type: "assistant",
+    //             conversation_id: selectedHistory?.id || chatResponse?.data?.conversation_id,
+    //             created_at: new Date().toISOString(),
+    //             updated_at: new Date().toISOString(),
+    //         };
+
+    //         setTimeout(() => {
+    //             setMessages((prevMessages) => [...prevMessages, agentMessage]);
+    //             // setIsSending(false);
+    //             // setDisplayedMessage("");
+    //         }, fullResponse.length * typingSpeed); // Delay full message display
+
+    //         if (!selectedHistory) {
+    //             const newConversationId = chatResponse?.data?.conversation_id;
+    //             const newConversation = {
+    //                 created_at: new Date().toISOString(),
+    //                 id: newConversationId,
+    //                 name: userMessage.message || "Attached files",
+    //                 updated_at: new Date().toISOString(),
+    //             };
+
+    //             setNewChat(newConversation);
+    //             setSelectedHistory(newConversation);
+    //             setIsNewConversation(true);
+    //         } else {
+    //             setIsNewConversation(false);
+    //         }
+    //     } catch (error) {
+    //         toast({
+    //             variant: "destructive",
+    //             title: "Error",
+    //             description: "Failed to send message",
+    //             duration: 5000,
+    //         });
+    //         console.error(error);
+    //         setIsSending(false);
+    //     }
+
+    //     setIsGenerating(false);
+    // };
+    const typeMessage = async (fullResponse: string) => {
+        return new Promise((resolve) => {
+            let index = 0;
+            const startTime = performance.now();
+    
+            const type = () => {
+                if (index < fullResponse.length) {
+                    // Instead of adding one character at a time, add in small chunks
+                    const nextChunk = Math.min(index + 10, fullResponse.length); // Add 3 characters per frame
+                    setDisplayedMessage((prev) => prev + fullResponse.slice(index, nextChunk));
+                    index = nextChunk;
+    
+                    // Use requestAnimationFrame for smoother updates
+                    if (index < fullResponse.length) {
+                        requestAnimationFrame(type);
+                    } else {
+                        console.log("Typing effect completed in:", performance.now() - startTime, "ms");
+                        resolve(true);
+                    }
+                }
+            };
+    
+            requestAnimationFrame(type);
+        });
+    };
     const handleSendMessage = async () => {
         if (inputText.trim() === "" && attachedFiles.length === 0) return;
         const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}");
@@ -293,6 +422,7 @@ export const ChatComponent = () => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
         setAttachedFiles([]);
         setInputText("");
+        setDisplayedMessage(""); // Reset displayedMessage
         setIsSending(true);
 
         try {
@@ -307,21 +437,26 @@ export const ChatComponent = () => {
             }
 
             const fullResponse = chatResponse?.data?.full_response || "";
-            let index = 0;
-            setDisplayedMessage(""); // Reset displayed message
-            // setIsSending(false)
 
-            // Simulate typewriter effect
-            const interval = setInterval(() => {
-                if (index < fullResponse.length) {
-                    setDisplayedMessage((prev) => prev + fullResponse[index]);
-                    index++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, typingSpeed);
+            // // Create a function to handle the typewriter effect using a Promise
+            // const typeMessage = () => {
+            //     return new Promise((resolve) => {
+            //         let index = 0;
+            //         const interval = setInterval(() => {
+            //             if (index < fullResponse.length) {
+            //                 setDisplayedMessage((prev) => prev + fullResponse[index]);
+            //                 index++;
+            //             } else {
+            //                 clearInterval(interval);
+            //                 resolve(true); // Resolve after typing effect finishes
+            //             }
+            //         }, typingSpeed);
+            //     });
+            // };
 
-            // Store the full response message
+            await typeMessage(fullResponse);; // Wait for typewriter effect to complete
+
+            // Now store the full response message AFTER the effect finishes
             const agentMessage = {
                 id: Math.floor(Math.random() * 10000000).toString(),
                 message: fullResponse, // Store full message
@@ -331,11 +466,8 @@ export const ChatComponent = () => {
                 updated_at: new Date().toISOString(),
             };
 
-            setTimeout(() => {
-                setMessages((prevMessages) => [...prevMessages, agentMessage]);
-                setIsSending(false);
-                setDisplayedMessage("");
-            }, fullResponse.length * typingSpeed); // Delay full message display
+            setMessages((prevMessages) => [...prevMessages, agentMessage]);
+            setIsSending(false); // Stop sending animation
 
             if (!selectedHistory) {
                 const newConversationId = chatResponse?.data?.conversation_id;
@@ -365,7 +497,6 @@ export const ChatComponent = () => {
 
         setIsGenerating(false);
     };
-
 
     const handleCopyMessage = (text: string) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -482,7 +613,7 @@ export const ChatComponent = () => {
                             ) : (
                                 // <div className="p-6 rounded-xl w-full bg-gradient-to-r from-[#fef4e5] to-[#f9cda1] ">
                                 <>
-                                    <div className="space-y-4 bg-white rounded-xl p-4 h-[calc(100vh-350px)] chat-container overflow-y-auto">
+                                    <div className="space-y-4 bg-white rounded-xl p-4 h-[calc(100vh-350px)] w-[calc(100vw-48rem)] chat-container overflow-y-auto">
                                         {messages?.map((message) => (
                                             <div
                                                 key={message.id}
@@ -500,7 +631,7 @@ export const ChatComponent = () => {
                                                     </div>
                                                 )}
                                                 <div
-                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[80%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : " ml-8"} relative `}
+                                                    className={`message-container py-2 p-4 rounded-3xl max-w-[70%] ${message.message_author_type === "user" ? "bg-[#FAF6F6]" : " ml-8"} relative `}
                                                 >
                                                     <div className="text-sm flex-1 break-words whitespace-normal overflow-hidden" >
 
