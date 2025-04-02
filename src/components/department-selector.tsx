@@ -68,7 +68,7 @@ export function DepartmentSelector({ user_type, selectedDepartments, setSelected
     if (response.success) {
 
       let apiData = response.data.results
-      apiData = apiData?.filter((data: any) => !data.is_folder).map((x: any) => ({ ...x, permissions: { view: true, edit: false, delete: false } }))
+      apiData = apiData?.map((x: any) => ({ ...x, permissions: { view: false, edit: false, delete: false } }))
       console.log(response.data.results);
       setApiDepartments(apiData);
       // setSyncStatuses(new Map(apiData.map((file: FileData) => [file.id, { status: "idle" }])));

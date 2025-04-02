@@ -9,19 +9,24 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { Folder, File, MoreHorizontal, Plus, ChevronDown, ChevronRight, Bell, Layout, User, MoreVertical, EllipsisVertical, XCircle, CheckCircle, X } from "lucide-react"
+import { Folder, MoreHorizontal, Plus, ChevronDown, ChevronRight, EllipsisVertical, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import FileUploadModal from "@/components/FileUploadModal"
-import { createDepartment, deleteDepartment, deleteFile, getDepartmentList, renameDepartment } from "@/components/apicalls/department"
+import {
+    createDepartment,
+    deleteDepartment,
+    deleteFile,
+    getDepartmentList,
+    renameDepartment,
+} from "@/components/apicalls/department"
 import { getOrganisationDetails } from "@/components/apicalls/organisation"
 import Loader from "@/components/Loader"
-import { getFileList, syncFile, unSyncFile, uploadFile } from "@/components/apicalls/tenant-file"
+import { getFileList, syncFile, unSyncFile } from "@/components/apicalls/tenant-file"
 import dayjs from "dayjs"
-import { getCodeFiles } from "@/components/apicalls/importcodefiles"
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -67,17 +72,17 @@ export default function DataSourceExplorer() {
     const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 })
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [isSelected, setIsSelected] = useState(false)
-    const [selectedItem, setSelectedItem] = useState<any>({});
+    const [selectedItem, setSelectedItem] = useState<any>({})
     const [activeItem, setActiveItem] = useState<Item | null>(null)
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [path, setPath] = useState<any[] | undefined>([]);
-    const [orgDetails, setOrgDetails] = useState<any>({});
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [path, setPath] = useState<any[] | undefined>([])
+    const [orgDetails, setOrgDetails] = useState<any>({})
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [pageSize, setPageSize] = useState<number>(10)
     const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
     // State for file view
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [selectedView, setSelectedView] = useState<"list" | "explorer">("list")
     const [selectedFiles, setSelectedFiles] = useState<string[]>([])
     const [fileContextMenuOpen, setFileContextMenuOpen] = useState(false)
@@ -102,6 +107,25 @@ export default function DataSourceExplorer() {
         })
     }
 
+    // Helper function to get all expanded item IDs
+    const getExpandedItemIds = (items: Item[]): string[] => {
+        const expandedIds: string[] = []
+
+        const collectExpandedIds = (items: Item[]) => {
+            items.forEach((item) => {
+                if (item.expanded) {
+                    expandedIds.push(item.id)
+                }
+                if (item.children && item.children.length > 0) {
+                    collectExpandedIds(item.children)
+                }
+            })
+        }
+
+        collectExpandedIds(items)
+        return expandedIds
+    }
+
     // Handle three-dot menu click
     const handleMenuClick = (e: React.MouseEvent, item: Item) => {
         e.stopPropagation()
@@ -112,10 +136,10 @@ export default function DataSourceExplorer() {
     }
 
     // Create new item
-    const createNewItem = (type: ItemType, isRename: boolean = false) => {
+    const createNewItem = (type: ItemType, isRename = false) => {
         if (!activeItem) return
         if (isRename) {
-            setIsRename(true);
+            setIsRename(true)
             setNewItemName(activeItem?.name)
         }
         setIsDropdownOpen(false)
@@ -132,61 +156,61 @@ export default function DataSourceExplorer() {
 
     // Add new item to the data structure
     const addNewItem = async (type: ItemType) => {
-
-
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
-        let payload: { name: string, parent?: string, is_folder?: boolean } = {
-            name: newItemName
+        const payload: { name: string; parent?: string; is_folder?: boolean } = {
+            name: newItemName,
         }
-        if (type == 'folder' && activeItem?.type == 'organization') {
-            payload['is_folder'] = true
+        if (type == "folder" && activeItem?.type == "organization") {
+            payload["is_folder"] = true
+        } else if (type == "sub-department") {
+            payload["parent"] = activeItem?.id
+        } else if (type == "folder" && activeItem?.type != "organization") {
+            payload["is_folder"] = true
+            payload["parent"] = activeItem?.id
         }
-        else if (type == 'sub-department') {
-            payload['parent'] = activeItem?.id
-        }
-        else if (type == 'folder' && activeItem?.type != 'organization') {
-            payload['is_folder'] = true
-            payload['parent'] = activeItem?.id
-        }
-        console.log(payload);
+        console.log(payload)
 
-        const response = await createDepartment(token, payload, tenant_id);
+        const response = await createDepartment(token, payload, tenant_id)
 
-        console.log(response);
+        console.log(response)
         if (response.success) {
-            await fetchCodeFiles();
+            // Store the current expanded state before fetching
+            const expandedItemIds = getExpandedItemIds(items)
+
+            // Fetch updated data
+            await fetchCodeFiles(expandedItemIds)
         } else {
-            setError(response.error);
+            setError(response.error)
         }
         // Reset state
         setNewItemName("Untitled folder")
         setCurrentParentId(null)
         closeAllDialogs()
-        setLoading(false);
+        setLoading(false)
     }
 
     // Close all dialogs
@@ -216,16 +240,15 @@ export default function DataSourceExplorer() {
     }
 
     const transformData = (orgDetails: any, apiData: any[]): Item[] => {
-
         const buildHierarchy = (department: any): Item => ({
             id: department?.id,
             name: department?.name,
-            type: department?.is_folder ? 'folder' : department?.parent == null ? 'department' : 'sub-department',
+            type: department?.is_folder ? "folder" : department?.parent == null ? "department" : "sub-department",
             expanded: false,
             path: department?.path,
             is_folder: department?.is_folder,
             children: department?.sub_departments?.map(buildHierarchy), // Recursively process sub-departments
-        });
+        })
         // children: dept.sub_departments.map((subDept: any) => ({
         //     ...subDept,
         //     type: subDept.is_folder ? "folder" : "sub-department",
@@ -234,415 +257,349 @@ export default function DataSourceExplorer() {
             {
                 id: orgDetails?.id,
                 name: orgDetails?.name,
-                type: 'organization',
+                type: "organization",
                 expanded: false,
-                children: apiData?.filter(dept => dept?.parent === null)?.map(buildHierarchy), // Build hierarchy for top-level departments
+                children: apiData?.filter((dept) => dept?.parent === null)?.map(buildHierarchy), // Build hierarchy for top-level departments
             },
-        ];
-    };
+        ]
+    }
 
-    const fetchCodeFiles = async () => {
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+    const fetchCodeFiles = async (expandedItemIds?: string[]) => {
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
-        const orgDetails = await getOrganisationDetails(token, tenant_id);
-        console.log(orgDetails);
+        const orgDetails = await getOrganisationDetails(token, tenant_id)
+        console.log(orgDetails)
 
         setOrgDetails(orgDetails)
-        const response = await getDepartmentList(token, tenant_id);
+        const response = await getDepartmentList(token, tenant_id)
         if (response.success) {
-            console.log(response.data.results);
+            console.log(response.data.results)
 
             // setSyncStatuses(new Map(apiData.map((file: FileData) => [file.id, { status: "idle" }])));
         } else {
-            setError(response.error);
+            setError(response.error)
         }
-        const apiData = transformData(orgDetails?.data, response?.data?.results);
-        setItems(apiData);
-        setLoading(false);
-    };
+        const apiData = transformData(orgDetails?.data, response?.data?.results)
+
+        // If we have expanded IDs to restore, apply them to the tree
+        if (expandedItemIds && expandedItemIds.length > 0) {
+            const restoreExpandedState = (items: Item[]): Item[] => {
+                return items.map((item) => {
+                    if (expandedItemIds.includes(item.id)) {
+                        item.expanded = true
+                    }
+                    if (item.children && item.children.length > 0) {
+                        item.children = restoreExpandedState(item.children)
+                    }
+                    return item
+                })
+            }
+
+            const updatedData = restoreExpandedState(apiData)
+            setItems(updatedData)
+        } else {
+            setItems(apiData)
+        }
+
+        setLoading(false)
+    }
     const getDocumentList = async (department_id: string, page: number, pageSize: number) => {
         // console.log('sssssssssss');
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
-        const response = await getFileList(token, tenant_id, department_id, page, pageSize);
+        const response = await getFileList(token, tenant_id, department_id, page, pageSize)
         if (response.success) {
-            console.log("getDocumentList", response.data.results);
+            console.log("getDocumentList", response.data.results)
 
             // const apiData = transformData(orgDetails.data, response.data.results);
-            setDocuments(response?.data);
+            setDocuments(response?.data)
             // setSyncStatuses(new Map(apiData.map((file: FileData) => [file.id, { status: "idle" }])));
         } else {
-            setError(response.error);
+            setError(response.error)
         }
-        setLoading(false);
-    };
-    const BASE_URL = "http://35.200.227.29:8000"; // Adjust based on your environment
+        setLoading(false)
+    }
+    const BASE_URL = "http://35.200.227.29:8000" // Adjust based on your environment
 
     // Handle file download in development mode needs to be fixed
     const handleDownload = async (fileUrl: string, fileName: string) => {
         try {
-            const fullUrl = `${BASE_URL}${fileUrl}`;
-            console.log("Downloading from:", fullUrl); // Debug log
-            const response = await fetch(fullUrl);
+            const fullUrl = `${BASE_URL}${fileUrl}`
+            console.log("Downloading from:", fullUrl) // Debug log
+            const response = await fetch(fullUrl)
 
             if (!response.ok) {
-                throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+                throw new Error(`Failed to download file: ${response.status} ${response.statusText}`)
             }
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = fileName
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
         } catch (error) {
-            console.error("Error downloading file:", error);
+            console.error("Error downloading file:", error)
         }
-    };
+    }
 
     // Handle file view (open in browser)
     const handleView = (fileUrl: string) => {
-        const fullUrl = `${BASE_URL}${fileUrl}`;
-        console.log("Viewing at:", fullUrl); // Debug log
-        window.open(fullUrl, "_blank"); // Open in a new tab
-    };
+        const fullUrl = `${BASE_URL}${fileUrl}`
+        console.log("Viewing at:", fullUrl) // Debug log
+        window.open(fullUrl, "_blank") // Open in a new tab
+    }
 
     // Handle file deletion
     const handleDelete = async (fileId: string) => {
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
 
-        const response = await deleteFile(token, tenant_id, fileId);
+        const response = await deleteFile(token, tenant_id, fileId)
         if (response.success) {
-            console.log(response.message); // "File successfully deleted"
+            console.log(response.message) // "File successfully deleted"
             // Refresh the file list after deletion
-            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : "", currentPage, pageSize)
         } else {
-            console.error("Delete failed:", response.error);
-            setError(response.error || "Failed to delete file");
+            console.error("Delete failed:", response.error)
+            setError(response.error || "Failed to delete file")
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
     const handleSync = async (doc: any) => {
         // console.log('ddddddddddddddddddddddddddddddddddd');
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
-        let response;
+        let response
 
-        if (doc?.upload_status == 'Ready to Sync') {
-            let payload: { file_id: string, department_id?: string } = {
+        if (doc?.upload_status == "Ready to Sync") {
+            const payload: { file_id: string; department_id?: string } = {
                 file_id: doc?.id,
-                department_id: doc?.department
+                department_id: doc?.department,
             }
 
-            response = await syncFile(token, tenant_id, payload);
-
+            response = await syncFile(token, tenant_id, payload)
         } else {
-            let payload: { file_ids: string[] } = {
-                file_ids: [doc.id]
+            const payload: { file_ids: string[] } = {
+                file_ids: [doc.id],
             }
-            response = await unSyncFile(token, tenant_id, payload);
+            response = await unSyncFile(token, tenant_id, payload)
         }
-
-
-
-
-
 
         if (response.success) {
-            console.log(response.message); // "File successfully deleted"
+            console.log(response.message) // "File successfully deleted"
             // Refresh the file list after deletion
-            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+            await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : "", currentPage, pageSize)
         } else {
-            console.error("Delete failed:", response.error);
-            setError(response.error || "Failed to delete file");
+            console.error("Delete failed:", response.error)
+            setError(response.error || "Failed to delete file")
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
     const handleDeleteDepartment = async () => {
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
 
-        const response = await deleteDepartment(token, tenant_id, activeItem?.id);
+        const response = await deleteDepartment(token, tenant_id, activeItem?.id)
         if (response.success) {
-            console.log(response.message); // "File successfully deleted"
-            // Refresh the file list after deletion
-            await fetchCodeFiles();
-            // await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+            console.log(response.message)
+            // Store expanded state before refreshing
+            const expandedItemIds = getExpandedItemIds(items)
+            // Remove the deleted item ID from expanded IDs
+            const filteredExpandedIds = expandedItemIds.filter((id) => id !== activeItem?.id)
+            // Refresh with preserved expanded state
+            await fetchCodeFiles(filteredExpandedIds)
         } else {
-            console.error("Delete failed:", response.error);
-            setError(response.error || "Failed to delete file");
+            console.error("Delete failed:", response.error)
+            setError(response.error || "Failed to delete file")
         }
-        setLoading(false);
-    };
+        setLoading(false)
+    }
     const handleRenameDepartment = async () => {
-        setLoading(true);
-        const authDetailsString = sessionStorage.getItem("authDetails");
+        setLoading(true)
+        const authDetailsString = sessionStorage.getItem("authDetails")
         if (!authDetailsString) {
-            setError("No authentication details found in session storage");
-            setLoading(false);
-            return;
+            setError("No authentication details found in session storage")
+            setLoading(false)
+            return
         }
 
-        let authDetails;
+        let authDetails
         try {
-            authDetails = JSON.parse(authDetailsString);
+            authDetails = JSON.parse(authDetailsString)
         } catch (e) {
-            setError("Failed to parse auth details from session storage");
-            setLoading(false);
-            return;
+            setError("Failed to parse auth details from session storage")
+            setLoading(false)
+            return
         }
 
-        const token = authDetails.data?.token;
-        const tenant_id = authDetails.data?.tenant_id;
+        const token = authDetails.data?.token
+        const tenant_id = authDetails.data?.tenant_id
 
         if (!token || !tenant_id) {
-            setError("Token or tenant_id missing in auth details");
-            setLoading(false);
-            return;
+            setError("Token or tenant_id missing in auth details")
+            setLoading(false)
+            return
         }
-        let payload: { name: string, parent?: string, is_folder?: boolean } = {
-            name: newItemName
+        const payload: { name: string; parent?: string; is_folder?: boolean } = {
+            name: newItemName,
         }
 
-        const response = await renameDepartment(token, tenant_id, payload, activeItem?.id);
-
+        const response = await renameDepartment(token, tenant_id, payload, activeItem?.id)
 
         if (response.success) {
-            console.log(response.message); // "File successfully deleted"
-            // Refresh the file list after deletion
-            await fetchCodeFiles();
-            // await getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage, pageSize);
+            console.log(response.message)
+            // Store expanded state before refreshing
+            const expandedItemIds = getExpandedItemIds(items)
+            // Refresh with preserved expanded state
+            await fetchCodeFiles(expandedItemIds)
         } else {
-            console.error("Delete failed:", response.error);
-            setError(response.error || "Failed to delete file");
+            console.error("Delete failed:", response.error)
+            setError(response.error || "Failed to delete file")
         }
         // Reset state
         setNewItemName("Untitled folder")
         setCurrentParentId(null)
         closeAllDialogs()
-        setLoading(false);
-    };
-
-
-
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault()
-
-    //     if (!file) {
-    //         toast({
-    //             variant: "destructive", title: (
-    //                 <div className="flex items-start gap-2">
-    //                     <XCircle className="h-11 w-9 text-white" />
-    //                     <div className="flex flex-col">
-    //                         <span className="font-semibold text-base">Error</span>
-    //                         <span className="text-sm font-light">No file selected</span>
-    //                     </div>
-    //                 </div>
-    //             ) as unknown as string, duration: 5000
-    //         });
-    //         return;
-    //     }
-    //     setLoading(true)
-    //     const formData = new FormData();
-    //     formData.append('file', file);
-
-
-
-    //     try {
-    //         const authDetails = JSON.parse(sessionStorage.getItem("authDetails") || "{}")
-    //         const token = authDetails?.data?.token
-    //         const tenant_id = authDetails?.data?.tenant_id
-
-    //         const response = await uploadFile(token, formData, tenant_id)
-
-    //         if (response.success) {
-    //             toast({
-    //                 variant: "success", title: (
-    //                     <div className="flex items-start gap-2">
-    //                         <CheckCircle className="h-11 w-9 text-white" />
-    //                         <div className="flex flex-col">
-    //                             <span className="font-semibold text-base">Uploaded</span>
-    //                             <span className="text-sm font-light">File Upload Successfully.</span>
-    //                         </div>
-    //                     </div>
-    //                 ) as unknown as string, duration: 5000
-    //             });
-    //             onClose()
-    //         } else {
-    //             // Handle error
-    //             console.error("Upload failed:", response.message)
-    //             toast({
-    //                 variant: "destructive", title: (
-    //                     <div className="flex items-start gap-2">
-    //                         <XCircle className="h-11 w-9 text-white" />
-    //                         <div className="flex flex-col">
-    //                             <span className="font-semibold text-base">Error</span>
-    //                             <span className="text-sm font-light">Upload failed. Please try again.</span>
-    //                         </div>
-    //                     </div>
-    //                 ) as unknown as string, duration: 5000
-    //             });
-    //         }
-    //     } catch (error) {
-    //         console.error("Upload error:", error)
-    //         toast({
-    //             variant: "destructive", title: (
-    //                 <div className="flex items-start gap-2">
-    //                     <XCircle className="h-11 w-9 text-white" />
-    //                     <div className="flex flex-col">
-    //                         <span className="font-semibold text-base">Error</span>
-    //                         <span className="text-sm font-light">An error occurred during upload. Please try again.</span>
-    //                     </div>
-    //                 </div>
-    //             ) as unknown as string, duration: 5000
-    //         });
-    //     } finally {
-    //         setLoading(false)
-    //     }
-
-    // }
-
-
+        setLoading(false)
+    }
 
     useEffect(() => {
-        fetchCodeFiles();
-    }, []);
+        fetchCodeFiles()
+    }, [])
 
     const isFolder = (name: string, departments: any[]): boolean => {
         for (const department of departments) {
             if (department.name === name && department.is_folder) {
-                return true;
+                return true
             }
             if (department.children && isFolder(name, department.children)) {
-                return true;
+                return true
             }
         }
-        return false;
-    };
+        return false
+    }
 
     const toggleSelectUser = (userId: string) => {
-        setSelectedDocuments((prev) =>
-            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-        )
+        setSelectedDocuments((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))
     }
 
     const toggleSelectAll = () => {
@@ -668,23 +625,32 @@ export default function DataSourceExplorer() {
         return (
             <div key={item.id}>
                 <div
-                    className={cn("flex items-center py-2 px-2 hover:bg-gray-100 cursor-pointer", level === 0 && "font-medium", isSelected && item.id == selectedItem?.id && "bg-gray-100")}
+                    className={cn(
+                        "flex items-center py-2 px-2 hover:bg-gray-100 cursor-pointer",
+                        level === 0 && "font-medium",
+                        isSelected && item.id == selectedItem?.id && "bg-gray-100",
+                    )}
                     style={{ paddingLeft: `${paddingLeft}px` }}
                     onClick={() => {
                         // if (item.type !== "organization") {
-                        setIsSelected(true);
-                        setCurrentPage(1);
-                        getDocumentList(item.type !== "organization" ? item?.id : '', 1, pageSize);
-                        console.log(item);
+                        setIsSelected(true)
+                        setCurrentPage(1)
+                        getDocumentList(item.type !== "organization" ? item?.id : "", 1, pageSize)
+                        console.log(item)
 
-                        let selectedPath: any = item?.path?.split('/')
-                        console.log(selectedPath);
-                        selectedPath?.[0] == '' ? selectedPath[0] = orgDetails?.data?.name : selectedPath = [orgDetails?.data?.name]
-                        selectedPath = selectedPath?.map((x: any, i: number) => ({ is_folder: isFolder(x, items?.[0]?.children || []), name: x }))
-                        setPath(selectedPath);
+                        let selectedPath: any = item?.path?.split("/")
+                        console.log(selectedPath)
+                        selectedPath?.[0] == ""
+                            ? (selectedPath[0] = orgDetails?.data?.name)
+                            : (selectedPath = [orgDetails?.data?.name])
+                        selectedPath = selectedPath?.map((x: any, i: number) => ({
+                            is_folder: isFolder(x, items?.[0]?.children || []),
+                            name: x,
+                        }))
+                        setPath(selectedPath)
 
-                        console.log(item);
-                        console.log(selectedPath);
+                        console.log(item)
+                        console.log(selectedPath)
                         setSelectedItem(item)
                         // }
                         toggleExpand(item.id)
@@ -713,10 +679,7 @@ export default function DataSourceExplorer() {
 
                     <span className="">{item.name}</span>
 
-                    <button
-                        className="hover:bg-gray-200 p-1 rounded"
-                        onClick={(e) => handleMenuClick(e, item)}
-                    >
+                    <button className="hover:bg-gray-200 p-1 rounded" onClick={(e) => handleMenuClick(e, item)}>
                         <EllipsisVertical size={16} className="text-zinc-400" />
                     </button>
                 </div>
@@ -737,35 +700,35 @@ export default function DataSourceExplorer() {
             {selectedView === "list" ? (
                 <div className="flex h-full">
                     {/* Sidebar */}
-                    <div className={`w-64 ${isSelected ? 'border-r' : ''} overflow-auto`}>{items.map((item) => renderTreeItem(item))}</div>
+                    <div className={`w-64 ${isSelected ? "border-r" : ""} overflow-auto`}>
+                        {items.map((item) => renderTreeItem(item))}
+                    </div>
 
                     {/* Main content */}
                     {isSelected ? (
                         <div className="flex-1 p-4">
                             <div className="flex justify-between mb-4">
                                 <div className="text-xl font-semibold flex gap-2">
-
-                                    {path && path.map((item: any, index: number) => (
-                                        <span className="flex gap-3 items-center" key={index}>
-                                            {index == 0 ? (
-
-                                                <img src="/organisation.svg" alt="" className="h-4 w-4 " />
-                                            ) : (
-
-                                                item?.is_folder ?
-                                                    <img src="/folder-icon.svg" alt="" className="h-4 w-4" /> :
+                                    {path &&
+                                        path.map((item: any, index: number) => (
+                                            <span className="flex gap-3 items-center" key={index}>
+                                                {index == 0 ? (
+                                                    <img src="/organisation.svg" alt="" className="h-4 w-4 " />
+                                                ) : item?.is_folder ? (
+                                                    <img src="/folder-icon.svg" alt="" className="h-4 w-4" />
+                                                ) : (
                                                     <img src="/department.svg" alt="" className="h-4 w-4" />
-                                            )}
-                                            {/* <span>{item}</span> */}
-                                            <span>{item?.name}</span>
-                                            {index == path?.length - 1 ? (
-                                                // <img src="/weui_arrow-outlined.svg" alt="" className="h-6 w-6" />
-                                                <></>
-                                            ) : (
-                                                <img src="/weui_arrow-outlined.svg" alt="" className="h-6 w-6" />
-                                            )}
-                                        </span>
-                                    ))}
+                                                )}
+                                                {/* <span>{item}</span> */}
+                                                <span>{item?.name}</span>
+                                                {index == path?.length - 1 ? (
+                                                    // <img src="/weui_arrow-outlined.svg" alt="" className="h-6 w-6" />
+                                                    <></>
+                                                ) : (
+                                                    <img src="/weui_arrow-outlined.svg" alt="" className="h-6 w-6" />
+                                                )}
+                                            </span>
+                                        ))}
                                 </div>
                                 <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => setIsModalOpen(true)}>
                                     <Plus className="h-4 w-4 mr-2" />
@@ -774,10 +737,18 @@ export default function DataSourceExplorer() {
 
                                 <FileUploadModal
                                     isOpen={isModalOpen}
-                                    department_id={activeItem ? (activeItem?.type == 'organization' ? null : activeItem?.id) : (selectedItem?.type == 'organization' ? null : selectedItem?.id)}
+                                    department_id={
+                                        activeItem
+                                            ? activeItem?.type == "organization"
+                                                ? null
+                                                : activeItem?.id
+                                            : selectedItem?.type == "organization"
+                                                ? null
+                                                : selectedItem?.id
+                                    }
                                     onClose={() => {
-                                        setCurrentPage(1);
-                                        getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', 1, pageSize);
+                                        setCurrentPage(1)
+                                        getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : "", 1, pageSize)
                                         setIsModalOpen(false)
                                     }}
                                 />
@@ -818,7 +789,6 @@ export default function DataSourceExplorer() {
                                             <button className="p-1 hover:bg-gray-200 rounded">
                                                 <img src="/trash.svg" alt="" className="h-4 w-4" />
                                             </button>
-
                                         </div>
                                     </div>
                                 )}
@@ -830,7 +800,9 @@ export default function DataSourceExplorer() {
                                                 <th className="w-8 p-3 text-left">
                                                     {/* <input type="checkbox" className="rounded" /> */}
                                                     <Checkbox
-                                                        checked={documents?.results?.length > 0 && selectedDocuments?.length === documents?.results?.length}
+                                                        checked={
+                                                            documents?.results?.length > 0 && selectedDocuments?.length === documents?.results?.length
+                                                        }
                                                         onCheckedChange={toggleSelectAll}
                                                     />
                                                 </th>
@@ -843,99 +815,97 @@ export default function DataSourceExplorer() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {documents?.results && documents?.results.map((doc: any) => (
-                                                <tr key={doc?.id} className="border-t hover:bg-gray-50">
-                                                    <td className="p-3">
-                                                        {/* <input type="checkbox" className="rounded" /> */}
-                                                        <Checkbox
-                                                            checked={selectedDocuments.includes(doc.id)}
-                                                            onCheckedChange={() => toggleSelectUser(doc.id)}
-                                                        />
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-5 h-5 flex items-center justify-center rounded">
-                                                                {/* <File className="h-3 w-3 text-yellow-600" /> */}
-                                                                <img src="/datasource-list-file.svg" alt="" className="h-4 w-4" />
+                                            {documents?.results &&
+                                                documents?.results.map((doc: any) => (
+                                                    <tr key={doc?.id} className="border-t hover:bg-gray-50">
+                                                        <td className="p-3">
+                                                            {/* <input type="checkbox" className="rounded" /> */}
+                                                            <Checkbox
+                                                                checked={selectedDocuments.includes(doc.id)}
+                                                                onCheckedChange={() => toggleSelectUser(doc.id)}
+                                                            />
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-5 h-5 flex items-center justify-center rounded">
+                                                                    {/* <File className="h-3 w-3 text-yellow-600" /> */}
+                                                                    <img src="/datasource-list-file.svg" alt="" className="h-4 w-4" />
+                                                                </div>
+                                                                <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-60">
+                                                                    {doc?.original_filename}
+                                                                </span>
                                                             </div>
-                                                            <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-60">{doc?.original_filename}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-3">
-
-
-                                                        {doc?.upload_status == 'Ready to Sync' ? (
-                                                            <span className="text-gray-800">{doc?.upload_status}</span>
-                                                        ) : doc?.upload_status == 'Ready' ? (
-                                                            <span className="text-green-500">{doc?.upload_status}</span>
-                                                        ) : doc?.upload_status == 'Not Accepted' ? (
-                                                            <span className="text-red-500">{doc?.upload_status}</span>
-                                                        ) : doc?.upload_status == 'Processing!' ? (
-                                                            <span className="text-blue-500">{doc?.upload_status}</span>
-                                                        ) : (
-                                                            <span className="text-orange-500">{doc?.upload_status}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="p-3">{doc?.last_sync ? dayjs(doc?.last_sync).format('hh:mm:ss | DD-MM-YYYY') : '-'}</td>
-                                                    <td className="p-3">{doc?.file_size_kb}</td>
-                                                    <td className="p-3">
-                                                        {doc?.upload_status == 'Ready to Sync' ? (
-                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
-
-                                                                <img src="/datasource-sync.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-                                                        ) : doc?.upload_status == 'Ready' ? (
-                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
-
-                                                                <img src="/datasource-sync-green.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-                                                        ) : doc?.upload_status == 'Not Accepted' ? (
-                                                            <button className="text-gray-500 hover:text-gray-700" >
-
-                                                                <>-</>
-                                                            </button>
-                                                        ) : doc?.upload_status == 'Processing!' ? (
-                                                            <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
-                                                                <img src="/datasource-sync-orange.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-
-                                                        ) : (
-                                                            <button className="text-gray-500 hover:text-gray-700" >
-                                                                <>-</>
-                                                            </button>
-                                                        )}
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <div className="flex items-center gap-3 text-gray-500">
-                                                            <button
-                                                                className="hover:text-gray-700"
-                                                                onClick={() => handleDownload(doc.file, doc.original_filename)}
-                                                                title="Download"
-                                                            >
-                                                                <img src="/datasource-download.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-                                                            <button
-                                                                className="hover:text-gray-700"
-                                                                onClick={() => handleView(doc.file)}
-                                                                title="View"
-                                                            >
-
-                                                                <img src="/datasource-view.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-                                                            {/* <button className="hover:text-gray-700">
+                                                        </td>
+                                                        <td className="p-3">
+                                                            {doc?.upload_status == "Ready to Sync" ? (
+                                                                <span className="text-gray-800">{doc?.upload_status}</span>
+                                                            ) : doc?.upload_status == "Ready" ? (
+                                                                <span className="text-green-500">{doc?.upload_status}</span>
+                                                            ) : doc?.upload_status == "Not Accepted" ? (
+                                                                <span className="text-red-500">{doc?.upload_status}</span>
+                                                            ) : doc?.upload_status == "Processing!" ? (
+                                                                <span className="text-blue-500">{doc?.upload_status}</span>
+                                                            ) : (
+                                                                <span className="text-orange-500">{doc?.upload_status}</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            {doc?.last_sync ? dayjs(doc?.last_sync).format("hh:mm:ss | DD-MM-YYYY") : "-"}
+                                                        </td>
+                                                        <td className="p-3">{doc?.file_size_kb}</td>
+                                                        <td className="p-3">
+                                                            {doc?.upload_status == "Ready to Sync" ? (
+                                                                <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+                                                                    <img src="/datasource-sync.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                            ) : doc?.upload_status == "Ready" ? (
+                                                                <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+                                                                    <img src="/datasource-sync-green.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                            ) : doc?.upload_status == "Not Accepted" ? (
+                                                                <button className="text-gray-500 hover:text-gray-700">
+                                                                    <>-</>
+                                                                </button>
+                                                            ) : doc?.upload_status == "Processing!" ? (
+                                                                <button className="text-gray-500 hover:text-gray-700" onClick={() => handleSync(doc)}>
+                                                                    <img src="/datasource-sync-orange.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                            ) : (
+                                                                <button className="text-gray-500 hover:text-gray-700">
+                                                                    <>-</>
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-3 text-gray-500">
+                                                                <button
+                                                                    className="hover:text-gray-700"
+                                                                    onClick={() => handleDownload(doc.file, doc.original_filename)}
+                                                                    title="Download"
+                                                                >
+                                                                    <img src="/datasource-download.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                                <button
+                                                                    className="hover:text-gray-700"
+                                                                    onClick={() => handleView(doc.file)}
+                                                                    title="View"
+                                                                >
+                                                                    <img src="/datasource-view.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                                {/* <button className="hover:text-gray-700">
                                                                 <img src="/send-2.svg" alt="" className="h-5 w-5" />
                                                             </button> */}
-                                                            <button
-                                                                className="hover:text-gray-700"
-                                                                onClick={() => handleDelete(doc.id)}
-                                                                title="Delete"
-                                                            >
-                                                                <img src="/trash.svg" alt="" className="h-5 w-5" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                                <button
+                                                                    className="hover:text-gray-700"
+                                                                    onClick={() => handleDelete(doc.id)}
+                                                                    title="Delete"
+                                                                >
+                                                                    <img src="/trash.svg" alt="" className="h-5 w-5" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                             {documents?.results?.length === 0 && (
                                                 <tr>
                                                     <td colSpan={7} className="text-center py-10">
@@ -953,10 +923,18 @@ export default function DataSourceExplorer() {
                                 <div className="p-3 border-t flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <span>Show</span>
-                                        <select className="border rounded px-2 py-1" value={pageSize} onChange={(e) => {
-                                            setPageSize(Number(e.target.value))
-                                            getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', 1, Number(e.target.value))
-                                        }}>
+                                        <select
+                                            className="border rounded px-2 py-1"
+                                            value={pageSize}
+                                            onChange={(e) => {
+                                                setPageSize(Number(e.target.value))
+                                                getDocumentList(
+                                                    selectedItem.type !== "organization" ? selectedItem?.id : "",
+                                                    1,
+                                                    Number(e.target.value),
+                                                )
+                                            }}
+                                        >
                                             <option value={10}>10</option>
                                             <option value={25}>25</option>
                                             <option value={50}>50</option>
@@ -964,10 +942,14 @@ export default function DataSourceExplorer() {
                                         <span>entries</span>
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <button className="border rounded p-1" disabled={documents?.results?.length == 0 || currentPage == 1} onClick={() => {
-                                            getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', 1, pageSize)
-                                            setCurrentPage(1);
-                                        }}>
+                                        <button
+                                            className="border rounded p-1"
+                                            disabled={documents?.results?.length == 0 || currentPage == 1}
+                                            onClick={() => {
+                                                getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : "", 1, pageSize)
+                                                setCurrentPage(1)
+                                            }}
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-4 w-4"
@@ -983,10 +965,18 @@ export default function DataSourceExplorer() {
                                                 />
                                             </svg>
                                         </button>
-                                        <button className="border rounded p-1" disabled={documents?.results?.length == 0 || currentPage == 1} onClick={() => {
-                                            getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage - 1, pageSize)
-                                            setCurrentPage(currentPage - 1);
-                                        }}>
+                                        <button
+                                            className="border rounded p-1"
+                                            disabled={documents?.results?.length == 0 || currentPage == 1}
+                                            onClick={() => {
+                                                getDocumentList(
+                                                    selectedItem.type !== "organization" ? selectedItem?.id : "",
+                                                    currentPage - 1,
+                                                    pageSize,
+                                                )
+                                                setCurrentPage(currentPage - 1)
+                                            }}
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-4 w-4"
@@ -997,11 +987,23 @@ export default function DataSourceExplorer() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                             </svg>
                                         </button>
-                                        <span className="px-2">Page {currentPage} of {Math.ceil(documents?.count / pageSize)}</span>
-                                        <button className="border rounded p-1" disabled={documents?.results?.length == 0 || currentPage == Math.ceil(documents?.count / pageSize)} onClick={() => {
-                                            getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', currentPage + 1, pageSize)
-                                            setCurrentPage(currentPage + 1);
-                                        }}>
+                                        <span className="px-2">
+                                            Page {currentPage} of {Math.ceil(documents?.count / pageSize)}
+                                        </span>
+                                        <button
+                                            className="border rounded p-1"
+                                            disabled={
+                                                documents?.results?.length == 0 || currentPage == Math.ceil(documents?.count / pageSize)
+                                            }
+                                            onClick={() => {
+                                                getDocumentList(
+                                                    selectedItem.type !== "organization" ? selectedItem?.id : "",
+                                                    currentPage + 1,
+                                                    pageSize,
+                                                )
+                                                setCurrentPage(currentPage + 1)
+                                            }}
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-4 w-4"
@@ -1012,10 +1014,20 @@ export default function DataSourceExplorer() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
                                         </button>
-                                        <button className="border rounded p-1" disabled={documents?.results?.length == 0 || currentPage == Math.ceil(documents?.count / pageSize)} onClick={() => {
-                                            getDocumentList(selectedItem.type !== "organization" ? selectedItem?.id : '', Math.ceil(documents?.count / pageSize), pageSize)
-                                            setCurrentPage(Math.ceil(documents?.count / pageSize));
-                                        }}>
+                                        <button
+                                            className="border rounded p-1"
+                                            disabled={
+                                                documents?.results?.length == 0 || currentPage == Math.ceil(documents?.count / pageSize)
+                                            }
+                                            onClick={() => {
+                                                getDocumentList(
+                                                    selectedItem.type !== "organization" ? selectedItem?.id : "",
+                                                    Math.ceil(documents?.count / pageSize),
+                                                    pageSize,
+                                                )
+                                                setCurrentPage(Math.ceil(documents?.count / pageSize))
+                                            }}
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-4 w-4"
@@ -1038,7 +1050,6 @@ export default function DataSourceExplorer() {
                     ) : (
                         <></>
                     )}
-
                 </div>
             ) : (
                 <div className="flex h-full">
@@ -1092,41 +1103,113 @@ export default function DataSourceExplorer() {
                 >
                     {activeItem?.type === "organization" && (
                         <>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("department")}>New Department</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("department")}
+                            >
+                                New Department
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("folder")}
+                            >
+                                New Folder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>
+                                New Source
+                            </DropdownMenuItem>
                         </>
                     )}
 
                     {activeItem?.type === "department" && (
                         <>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department")}>New Sub-Department</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("department", true)}>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("sub-department")}
+                            >
+                                New Sub-Department
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("folder")}
+                            >
+                                New Folder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => setIsModalOpen(true)}
+                            >
+                                New Source
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("department", true)}
+                            >
+                                Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>
+                                Delete
+                            </DropdownMenuItem>
                         </>
                     )}
 
                     {activeItem?.type === "sub-department" && (
                         <>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department")}>New Sub-Department</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("sub-department", true)}>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("sub-department")}
+                            >
+                                New Sub-Department
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("folder")}
+                            >
+                                New Folder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => setIsModalOpen(true)}
+                            >
+                                New Source
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("sub-department", true)}
+                            >
+                                Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>
+                                Delete
+                            </DropdownMenuItem>
                         </>
                     )}
 
                     {activeItem?.type === "folder" && (
                         <>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder")}>New Folder</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => setIsModalOpen(true)}>New Source</DropdownMenuItem>
-                            <DropdownMenuItem className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2" onClick={() => createNewItem("folder", true)}>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>Delete</DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("folder")}
+                            >
+                                New Folder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => setIsModalOpen(true)}
+                            >
+                                New Source
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="border-b-[1px] border-b-gray-300 rounded-none px-4 py-2"
+                                onClick={() => createNewItem("folder", true)}
+                            >
+                                Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-none px-4 py-2" onClick={() => handleDeleteDepartment()}>
+                                Delete
+                            </DropdownMenuItem>
                         </>
                     )}
-
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -1134,7 +1217,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateDepartmentOpen} onOpenChange={setIsCreateDepartmentOpen} modal={true}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Department</DialogTitle>
+                        <DialogTitle>{isRename ? "Update" : "Create new"} Department</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1153,7 +1236,6 @@ export default function DataSourceExplorer() {
                                 Update
                             </Button>
                         ) : (
-
                             <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("department")}>
                                 Create
                             </Button>
@@ -1166,7 +1248,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateSubDepartmentOpen} onOpenChange={setIsCreateSubDepartmentOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Sub-Department</DialogTitle>
+                        <DialogTitle>{isRename ? "Update" : "Create new"} Sub-Department</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1185,7 +1267,6 @@ export default function DataSourceExplorer() {
                                 Update
                             </Button>
                         ) : (
-
                             <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("sub-department")}>
                                 Create
                             </Button>
@@ -1198,7 +1279,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateFolderOpen} onOpenChange={setIsCreateFolderOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{isRename ? 'Update' : 'Create new'} Folder</DialogTitle>
+                        <DialogTitle>{isRename ? "Update" : "Create new"} Folder</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1217,7 +1298,6 @@ export default function DataSourceExplorer() {
                                 Update
                             </Button>
                         ) : (
-
                             <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("folder")}>
                                 Create
                             </Button>
@@ -1230,7 +1310,7 @@ export default function DataSourceExplorer() {
             <Dialog open={isCreateSourceOpen} onOpenChange={setIsCreateSourceOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle> {isRename ? 'Update' : 'Create new'} Source</DialogTitle>
+                        <DialogTitle> {isRename ? "Update" : "Create new"} Source</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
                         <Input
@@ -1249,7 +1329,6 @@ export default function DataSourceExplorer() {
                                 Update
                             </Button>
                         ) : (
-
                             <Button className="bg-[#FF6B35] hover:bg-[#FF8C5A]" onClick={() => addNewItem("source")}>
                                 Create
                             </Button>
